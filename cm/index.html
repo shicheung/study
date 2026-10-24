@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="默書">
+<meta name="theme-color" content="#ff8a3d">
+<title>默書小幫手 Dictation Helper</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%8F%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#fff7e8; --card:#ffffff; --ink:#2b2d42; --muted:#7a7f99;
+  --orange:#ff8a3d; --orange-d:#e06a1d; --blue:#3a86ff; --blue-d:#2563d8;
+  --green:#2bb673; --green-d:#1f8f58; --red:#ef476f; --red-d:#c9304f;
+  --line:#f0e3cc; --soft:#f6ecd9; --radius:20px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang HK","PingFang TC","Microsoft JhengHei","Noto Sans TC","Segoe UI",Roboto,sans-serif;font-size:18px;line-height:1.5;min-height:100vh;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+#app{max-width:680px;margin:0 auto;padding:16px 16px calc(40px + env(safe-area-inset-bottom))}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 18px;min-height:44px}
+h1{font-size:25px;margin:0;line-height:1.2}
+h1 small{display:block;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.04em}
+h2{font-size:22px;margin:0 0 10px}
+h3{font-size:18px;margin:0 0 12px}
+.card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:0 2px 0 var(--line),0 8px 20px rgba(43,45,66,.06);margin-bottom:14px}
+.center{text-align:center}
+.small{font-size:14px}
+.muted{color:var(--muted)}
+.spacer{height:16px}
+.emoji{font-size:56px;line-height:1.1;margin-bottom:6px}
+
+.btn{appearance:none;border:0;border-radius:16px;padding:12px 18px;font:inherit;font-weight:800;cursor:pointer;color:#fff;background:var(--orange);box-shadow:0 4px 0 var(--orange-d);transition:transform .06s,box-shadow .06s;display:inline-flex;align-items:center;justify-content:center;gap:6px;user-select:none;-webkit-user-select:none;line-height:1.25;text-align:center}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--orange-d)}
+.btn.green{background:var(--green);box-shadow:0 4px 0 var(--green-d)}
+.btn.green:active{box-shadow:0 1px 0 var(--green-d)}
+.btn.blue{background:var(--blue);box-shadow:0 4px 0 var(--blue-d)}
+.btn.blue:active{box-shadow:0 1px 0 var(--blue-d)}
+.btn.red{background:var(--red);box-shadow:0 4px 0 var(--red-d)}
+.btn.red:active{box-shadow:0 1px 0 var(--red-d)}
+.btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:0 3px 0 var(--line)}
+.btn.ghost:active{box-shadow:0 0 0 var(--line)}
+.btn.sm{padding:7px 12px;font-size:15px;border-radius:12px}
+.btn.big{font-size:21px;padding:16px 22px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.35;pointer-events:none}
+
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stack{flex-direction:column;align-items:stretch;gap:14px}
+
+/* home */
+.list .lhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.list .linfo{min-width:0}
+.list .lname{font-size:21px;font-weight:800;word-break:break-word}
+.list .tools{margin-top:14px;padding-top:12px;border-top:2px dashed var(--line)}
+.badge{display:inline-block;font-size:13px;font-weight:800;padding:2px 10px;border-radius:999px;background:#ffe9d6;color:var(--orange-d);vertical-align:1px}
+.badge.en{background:#e1ecff;color:var(--blue-d)}
+.empty p{margin:6px 0}
+
+/* editor */
+.field{display:block;margin-bottom:16px}
+.field>span{display:block;font-weight:800;margin-bottom:6px}
+.field em{font-style:normal;font-weight:600}
+input[type=text],textarea,select{width:100%;font:inherit;font-size:20px;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:#fffdf8;color:var(--ink)}
+textarea{line-height:1.7;resize:vertical;min-height:240px}
+select{font-size:16px}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--orange)}
+.seg{display:flex;background:var(--soft);border-radius:14px;padding:4px;gap:4px}
+.seg label{flex:1;cursor:pointer;position:relative}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;text-align:center;padding:10px 6px;border-radius:11px;font-weight:800;color:var(--muted)}
+.seg input:checked+span{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.hint{background:var(--soft);border-radius:14px;padding:12px 14px;font-size:15px;margin:0}
+code{background:#fff;padding:1px 6px;border-radius:6px;font-size:14px}
+
+/* practice */
+.progress{height:12px;background:var(--soft);border-radius:999px;overflow:hidden;margin-bottom:22px}
+.progress div{height:100%;background:linear-gradient(90deg,var(--orange),#ffb347);border-radius:999px;transition:width .3s}
+.prac{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.qnum{font-size:30px;font-weight:800}
+.qnum b{font-size:72px;color:var(--orange);margin:0 6px;line-height:1}
+.speak{appearance:none;border:0;cursor:pointer;width:min(240px,70vw);aspect-ratio:1;border-radius:50%;background:var(--blue);color:#fff;font:inherit;font-weight:800;font-size:22px;box-shadow:0 8px 0 var(--blue-d),0 14px 30px rgba(58,134,255,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform .08s,box-shadow .08s;margin:6px 0 10px}
+.speak:active{transform:translateY(6px);box-shadow:0 2px 0 var(--blue-d)}
+.speak .ico{font-size:64px;line-height:1}
+.speak small{font-size:14px;opacity:.85}
+.speak.on .ico{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.18)}}
+.nav{display:flex;gap:12px;width:100%;justify-content:space-between;margin-top:8px}
+.nav .btn{flex:1}
+.nav .btn.big{flex:1.6}
+.keys{display:none}
+@media (hover:hover) and (pointer:fine){.keys{display:block}}
+.ready{font-size:22px;font-weight:800;margin:14px 0}
+.check{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;margin:16px 0;cursor:pointer}
+.check input{width:24px;height:24px;accent-color:var(--orange)}
+.warn{background:#fff1f3;border:2px solid #ffd0da;color:#8a1f3a;border-radius:14px;padding:12px 14px;font-size:15px;text-align:left;margin:12px 0}
+.warn a{color:inherit;font-weight:800}
+
+/* check */
+.score .big{font-size:30px;font-weight:800;line-height:1.3}
+.score .big small{font-size:16px;color:var(--muted)}
+.stats{display:flex;justify-content:center;gap:24px;font-size:22px;font-weight:800;margin-top:6px}
+.stats .ok{color:var(--green)} .stats .no{color:var(--red)}
+.answers{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.ans{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:10px 10px 10px 12px;border:3px solid transparent;box-shadow:0 2px 0 var(--line)}
+.ans.o{border-color:var(--green);background:#effbf4}
+.ans.x{border-color:var(--red);background:#fff1f4}
+.ans .num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.ans .txt{flex:1;min-width:0;font-size:24px;font-weight:700;word-break:break-word;line-height:1.35}
+.ans .txt small{display:block;font-size:14px;font-weight:500;color:var(--muted)}
+.mk{appearance:none;border:2px solid var(--line);background:#fff;width:46px;height:46px;border-radius:14px;font-size:22px;font-weight:900;cursor:pointer;flex:none;color:var(--muted)}
+.mk.hear{border:0;background:transparent;width:36px;font-size:18px}
+.ans.o .mk.ok{background:var(--green);border-color:var(--green);color:#fff}
+.ans.x .mk.no{background:var(--red);border-color:var(--red);color:#fff}
+
+/* settings */
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0 6px;font-weight:700}
+input[type=range]{width:100%;accent-color:var(--orange);height:28px}
+.tips{font-size:14px;margin:8px 0 0;padding-left:20px}
+.tips li{margin-bottom:4px}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-weight:700;font-size:15px;z-index:100;animation:tin .2s ease-out;max-width:90vw;text-align:center}
+@keyframes tin{from{opacity:0;transform:translate(-50%,10px)}}
+.confetti{position:fixed;top:-50px;pointer-events:none;z-index:60;animation:fall 2.8s ease-in forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(540deg)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<script>
+(function(){
+'use strict';
+
+/* ---------- helpers ---------- */
+const app = document.getElementById('app');
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){ toast('⚠️ 未能儲存 Could not save'); } }
+};
+function parseItems(text){ return String(text || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean); }
+function splitItem(line){
+  const i = line.indexOf('|');
+  return i < 0 ? {answer: line.trim(), extra: ''} : {answer: line.slice(0, i).trim(), extra: line.slice(i + 1).trim()};
+}
+function today(){ const d = new Date(); return d.getDate() + '/' + (d.getMonth() + 1); }
+function shuffle(a){ for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function toast(msg){
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2400);
+}
+function b64e(str){ const bytes = new TextEncoder().encode(str); let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b)); return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function b64d(s){ s = s.replace(/-/g,'+').replace(/_/g,'/'); while(s.length % 4) s += '='; const bin = atob(s); return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))); }
+
+/* ---------- state ---------- */
+let lists = store.get('cm.lists', []);
+const DEFAULTS = {zhVoice:'', enVoice:'', rateZh:0.8, rateEn:0.85, repeat:2, gap:3, readPunct:false, shuffle:false, lastLang:'zh'};
+let settings = Object.assign({}, DEFAULTS, store.get('cm.settings', {}));
+const saveLists = () => store.set('cm.lists', lists);
+const saveSettings = () => store.set('cm.settings', settings);
+let view = 'home', editing = null, session = null;
+
+/* ---------- speech ---------- */
+const HAS_TTS = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+let voices = [];
+const live = new Set();
+let token = 0;
+function loadVoices(){ if(HAS_TTS) voices = speechSynthesis.getVoices() || []; }
+if(HAS_TTS){
+  loadVoices();
+  speechSynthesis.addEventListener ? speechSynthesis.addEventListener('voiceschanged', onVoices) : (speechSynthesis.onvoiceschanged = onVoices);
+}
+function onVoices(){ loadVoices(); if(view === 'settings' || (view === 'practice' && session && session.pos < 0)) render(); }
+function voicesFor(lang){
+  if(lang === 'zh') return voices.filter(v => /^(zh[-_]hk|yue|zh[-_]yue)/i.test(v.lang) || /cantonese|粵|廣東/i.test(v.name));
+  return voices.filter(v => /^en/i.test(v.lang));
+}
+function pickVoice(lang){
+  const vs = voicesFor(lang);
+  const saved = lang === 'zh' ? settings.zhVoice : settings.enVoice;
+  return vs.find(v => v.voiceURI === saved)
+    || (lang === 'en' ? vs.find(v => /en[-_]gb/i.test(v.lang)) : null)
+    || vs[0] || null;
+}
+function speakOnce(text, lang, rate){
+  return new Promise(res => {
+    if(!HAS_TTS || !text){ res(); return; }
+    const u = new SpeechSynthesisUtterance(text);
+    const v = pickVoice(lang);
+    if(v) u.voice = v;
+    u.lang = v ? v.lang : (lang === 'zh' ? 'zh-HK' : 'en-GB');
+    u.rate = rate;
+    let done = false;
+    const fin = () => { if(done) return; done = true; live.delete(u); clearTimeout(t); res(); };
+    const t = setTimeout(fin, 3000 + text.length * (lang === 'zh' ? 500 : 140) / rate);
+    u.onend = fin; u.onerror = fin;
+    live.add(u);
+    if(speechSynthesis.paused) speechSynthesis.resume();
+    speechSynthesis.speak(u);
+  });
+}
+const ZH_P = {'，':'逗號','。':'句號','、':'頓號','！':'感嘆號','？':'問號','：':'冒號','；':'分號','「':'上引號','」':'下引號','『':'上引號','』':'下引號',',':'逗號','.':'句號','!':'感嘆號','?':'問號',':':'冒號',';':'分號'};
+const EN_P = {',':'comma','.':'full stop','!':'exclamation mark','?':'question mark',':':'colon',';':'semicolon'};
+function chunks(text, lang){
+  const P = lang === 'zh' ? ZH_P : EN_P;
+  const out = []; let cur = '';
+  for(const ch of text){
+    if(Object.prototype.hasOwnProperty.call(P, ch)){
+      if(settings.readPunct) cur += ' ' + P[ch];
+      if(cur.trim()){ out.push(cur.trim()); cur = ''; }
+    } else cur += ch;
+  }
+  if(cur.trim()) out.push(cur.trim());
+  return out.length ? out : [text];
+}
+function setSpeaking(on){ const b = $('.speak'); if(b) b.classList.toggle('on', on); }
+function stopSpeech(){ token++; if(HAS_TTS && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel(); setSpeaking(false); }
+async function say(line, lang, opts){
+  opts = opts || {};
+  const my = ++token;
+  if(HAS_TTS && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel();
+  const {answer, extra} = splitItem(line);
+  const rate = (lang === 'zh' ? settings.rateZh : settings.rateEn) * (opts.slow ? 0.7 : 1);
+  const times = opts.times || settings.repeat;
+  setSpeaking(true);
+  try{
+    for(let r = 0; r < times; r++){
+      for(const c of chunks(answer, lang)){
+        if(my !== token) return;
+        await speakOnce(c, lang, rate);
+        await wait(opts.slow ? 600 : 350);
+      }
+      if(extra && r === 0){
+        for(const c of chunks(extra, lang)){
+          if(my !== token) return;
+          await speakOnce(c, lang, rate);
+          await wait(350);
+        }
+      }
+      if(r < times - 1){ await wait(settings.gap * 1000); if(my !== token) return; }
+    }
+  } finally { if(my === token) setSpeaking(false); }
+}
+
+/* ---------- wake lock (keep screen on while practising) ---------- */
+let wakeLock = null;
+async function requestWake(){ try{ if('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }catch(e){} }
+function releaseWake(){ try{ if(wakeLock) wakeLock.release(); }catch(e){} wakeLock = null; }
+
+/* ---------- navigation ---------- */
+function go(v){
+  if(v !== view){ stopSpeech(); if(v !== 'practice') releaseWake(); }
+  view = v; render(); window.scrollTo(0, 0);
+}
+function render(){
+  const html = view === 'edit' ? viewEdit()
+    : view === 'practice' ? viewPractice()
+    : view === 'check' ? viewCheck()
+    : view === 'settings' ? viewSettings()
+    : viewHome();
+  app.innerHTML = html;
+}
+
+/* ---------- views ---------- */
+function langBadge(l){ return `<span class="badge ${l}">${l === 'zh' ? '中文' : 'English'}</span>`; }
+
+function viewHome(){
+  const sorted = lists.slice().sort((a, b) => (b.updated || 0) - (a.updated || 0));
+  const cards = sorted.map(l => {
+    const n = parseItems(l.text).length;
+    const sc = l.last ? ` · 上次 Last <b>${l.last.r}/${l.last.t}</b>${l.last.r === l.last.t ? ' ⭐' : ''}` : '';
+    return `<div class="card list">
+      <div class="lhead">
+        <div class="linfo">
+          <div class="lname">${esc(l.name)}</div>
+          <div class="muted small">${langBadge(l.lang)} ${n} 項${sc}</div>
+        </div>
+        <button class="btn green" data-act="play" data-id="${l.id}">▶ 開始</button>
+      </div>
+      <div class="row tools">
+        <button class="btn ghost sm" data-act="edit" data-id="${l.id}">✏️ 修改 Edit</button>
+        <button class="btn ghost sm" data-act="share" data-id="${l.id}">🔗 分享 Share</button>
+        <button class="btn ghost sm" data-act="del" data-id="${l.id}" aria-label="刪除 Delete">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+  return `<header class="top">
+      <h1>✏️ 默書小幫手<small>DICTATION HELPER</small></h1>
+      <button class="btn ghost sm" data-act="settings" aria-label="設定 Settings">⚙️ 設定</button>
+    </header>
+    <button class="btn big block" data-act="new">＋ 新增默書 New list</button>
+    <div class="spacer"></div>
+    ${cards || `<div class="card center empty">
+      <div class="emoji">📚</div>
+      <p><b>還沒有默書。</b><br>按上面「新增默書」加入這星期的默書吧！</p>
+      <p class="muted small">No lists yet — tap “New list” to add this week’s dictation.</p>
+    </div>`}`;
+}
+
+const PH = '每行一項，例如：\n蘋果\n星期六\n我和媽媽去公園玩。\n\napple\nlibrary | I borrow books from the library.';
+function viewEdit(){
+  const e = editing;
+  return `<header class="top">
+      <button class="btn ghost sm" data-act="home">◀ 返回</button>
+      <h2 style="margin:0">${e.id ? '修改默書' : '新增默書'}</h2>
+      <span style="width:70px"></span>
+    </header>
+    <div class="card">
+      <label class="field"><span>名稱 Name</span>
+        <input id="f-name" type="text" value="${esc(e.name)}" maxlength="40" autocomplete="off">
+      </label>
+      <div class="field"><span>語言 Language</span>
+        <div class="seg">
+          <label><input type="radio" name="lang" value="zh" ${e.lang === 'zh' ? 'checked' : ''}><span>中文（廣東話）</span></label>
+          <label><input type="radio" name="lang" value="en" ${e.lang === 'en' ? 'checked' : ''}><span>English</span></label>
+        </div>
+      </div>
+      <label class="field"><span>內容 Items <em class="muted">· 每行一項 one per line ·</em> <b id="f-count">${parseItems(e.text).length}</b> 項</span>
+        <textarea id="f-text" rows="12" placeholder="${esc(PH)}" autocapitalize="off" spellcheck="false">${esc(e.text)}</textarea>
+      </label>
+      <p class="hint">💡 想讀出例句？用「|」分開：<br><code>library | I borrow books from the library.</code><br>只考「|」前面的部分，例句只會讀出來幫助理解。<br><span class="muted">Text after “|” is read aloud as a hint but not tested.</span></p>
+    </div>
+    <button class="btn big green block" data-act="save">💾 儲存 Save</button>`;
+}
+
+function voiceWarning(lang){
+  if(!HAS_TTS) return `<div class="warn">⚠️ 這個瀏覽器不支援朗讀。請用 Safari（iPad / iPhone）或 Chrome。<br>This browser can’t read aloud — please use Safari or Chrome.</div>`;
+  if(lang === 'zh' && voices.length && !voicesFor('zh').length)
+    return `<div class="warn">⚠️ 找不到廣東話聲音，可能會用普通話或英文讀出。<a href="#" data-act="settings">查看設定 →</a><br><span class="small">No Cantonese voice found on this device.</span></div>`;
+  return '';
+}
+
+function viewPractice(){
+  const s = session, zh = s.lang === 'zh';
+  if(s.pos < 0){
+    return `<header class="top">
+        <button class="btn ghost sm" data-act="exit">◀ 返回</button>
+        ${langBadge(s.lang)}
+      </header>
+      <div class="card center">
+        <div class="emoji">📝</div>
+        <h2>${esc(s.name)}</h2>
+        <p class="muted">共 <b>${s.items.length}</b> 項 · ${s.items.length} items</p>
+        <p class="ready">準備好紙和筆！<br><span class="muted small">Get your paper and pencil ready!</span></p>
+        ${voiceWarning(s.lang)}
+        <label class="check"><input type="checkbox" data-set="shuffle" ${settings.shuffle ? 'checked' : ''}> 🔀 打亂次序 Shuffle</label>
+        <button class="btn big green block" data-act="begin">開始默書 Start ▶</button>
+      </div>`;
+  }
+  const n = s.items.length, i = s.pos, last = i === n - 1;
+  return `<header class="top">
+      <button class="btn ghost sm" data-act="exit">✕ 離開</button>
+      <span class="muted small">${esc(s.name)}</span>
+    </header>
+    <div class="progress"><div style="width:${(i + 1) / n * 100}%"></div></div>
+    <div class="prac">
+      <div class="qnum">${zh ? `第<b>${i + 1}</b>題` : `No.<b>${i + 1}</b>`}</div>
+      <div class="muted">${i + 1} / ${n}</div>
+      <button class="speak" data-act="repeat" aria-label="再聽一次 Listen again">
+        <span class="ico">🔊</span><span>再聽一次</span><small>Listen again</small>
+      </button>
+      <button class="btn ghost" data-act="slow">🐢 慢慢讀 Read slowly</button>
+      <div class="nav">
+        <button class="btn ghost" data-act="prev" ${i === 0 ? 'disabled' : ''}>◀ 上一題</button>
+        ${last
+          ? `<button class="btn big blue" data-act="finish">✅ 完成 Done</button>`
+          : `<button class="btn big green" data-act="next">下一題 ▶</button>`}
+      </div>
+      <p class="muted small keys">⌨️ 空白鍵 Space = 再聽 · → 下一題 · ← 上一題</p>
+    </div>`;
+}
+
+function tally(){
+  const m = session.marks;
+  return {r: m.filter(x => x === 'o').length, x: m.filter(x => x === 'x').length, n: m.length};
+}
+function viewCheck(){
+  const s = session, t = tally(), done = t.r + t.x === t.n;
+  const head = done
+    ? (t.r === t.n ? `🎉 全對！好叻呀！<br><small>All correct — well done!</small>` : `${t.r} / ${t.n} 正確<br><small>${t.r} out of ${t.n} correct</small>`)
+    : `對答案<br><small>Check your answers</small>`;
+  const rows = s.items.map((line, i) => {
+    const {answer, extra} = splitItem(line);
+    const m = s.marks[i] || '';
+    return `<div class="ans ${m}">
+      <div class="num">${i + 1}</div>
+      <div class="txt">${esc(answer)}${extra ? `<small>${esc(extra)}</small>` : ''}</div>
+      <button class="mk hear" data-act="hear" data-id="${i}" aria-label="聽 Listen">🔊</button>
+      <button class="mk ok" data-act="mark" data-id="${i}" data-v="o" aria-label="對 Correct">✓</button>
+      <button class="mk no" data-act="mark" data-id="${i}" data-v="x" aria-label="錯 Wrong">✗</button>
+    </div>`;
+  }).join('');
+  return `<header class="top">
+      <button class="btn ghost sm" data-act="home">🏠 主頁</button>
+      <span class="muted small">${esc(s.name)}</span>
+    </header>
+    <div class="card center score">
+      <div class="big">${head}</div>
+      <p class="muted small">對照紙上寫的，按 ✓ 或 ✗<br>Compare with your paper, then tap ✓ or ✗.</p>
+      <div class="stats"><span class="ok">✓ ${t.r}</span><span class="no">✗ ${t.x}</span></div>
+    </div>
+    <div class="answers">${rows}</div>
+    <div class="row stack">
+      ${t.x ? `<button class="btn big red block" data-act="retryWrong">🔁 再默錯的 (${t.x}) Practise mistakes</button>` : ''}
+      <button class="btn blue block" data-act="retryAll">↺ 全部再默一次 Do it again</button>
+      <button class="btn ghost block" data-act="home">🏠 返回主頁 Home</button>
+    </div>`;
+}
+
+function voiceSelect(lang){
+  const vs = voicesFor(lang), cur = pickVoice(lang);
+  if(!vs.length) return '';
+  return `<select data-set="${lang === 'zh' ? 'zhVoice' : 'enVoice'}">${vs.map(v =>
+    `<option value="${esc(v.voiceURI)}" ${cur && cur.voiceURI === v.voiceURI ? 'selected' : ''}>${esc(v.name)} (${esc(v.lang)})</option>`).join('')}</select>`;
+}
+function viewSettings(){
+  const zhVs = voicesFor('zh');
+  const zhTips = (HAS_TTS && voices.length && !zhVs.length) ? `<div class="warn">⚠️ 這部裝置未有廣東話聲音。安裝方法：
+      <ul class="tips">
+        <li><b>iPad / iPhone：</b>設定 › 輔助使用 › 朗讀內容 › 聲音 › 中文（香港）</li>
+        <li><b>Windows：</b>設定 › 時間與語言 › 語音 › 新增語音 › 中文（香港特別行政區）</li>
+        <li><b>Android：</b>安裝「Google 文字轉語音」並下載粵語（香港）</li>
+        <li>電腦上的 <b>Chrome</b> 通常已內置「Google 粵語（香港）」</li>
+      </ul>裝好後重新開啟此頁。Reload this page after installing.</div>` : '';
+  return `<header class="top">
+      <button class="btn ghost sm" data-act="home">◀ 返回</button>
+      <h2 style="margin:0">⚙️ 設定 Settings</h2>
+      <span style="width:70px"></span>
+    </header>
+    ${!HAS_TTS ? voiceWarning('zh') : ''}
+    <div class="card">
+      <h3>🗣️ 廣東話聲音 Cantonese voice</h3>
+      ${voiceSelect('zh')}${zhTips}
+      <div class="set-row"><span>速度 Speed</span><span id="lbl-rateZh">${settings.rateZh.toFixed(2)}×</span></div>
+      <input type="range" min="0.5" max="1.2" step="0.05" value="${settings.rateZh}" data-set="rateZh">
+      <button class="btn ghost sm" data-act="test" data-id="zh">▶ 試聽 Test</button>
+    </div>
+    <div class="card">
+      <h3>🗣️ English voice</h3>
+      ${voiceSelect('en') || '<p class="muted small">No English voice found.</p>'}
+      <div class="set-row"><span>速度 Speed</span><span id="lbl-rateEn">${settings.rateEn.toFixed(2)}×</span></div>
+      <input type="range" min="0.5" max="1.2" step="0.05" value="${settings.rateEn}" data-set="rateEn">
+      <button class="btn ghost sm" data-act="test" data-id="en">▶ Test</button>
+    </div>
+    <div class="card">
+      <h3>📖 讀法 How each item is read</h3>
+      <div class="set-row"><span>每項讀幾次 Times per item</span>
+        <select data-set="repeat" style="width:auto">${[1,2,3].map(n => `<option value="${n}" ${settings.repeat === n ? 'selected' : ''}>${n}</option>`).join('')}</select>
+      </div>
+      <div class="set-row"><span>每次之間停頓 Pause between</span><span id="lbl-gap">${settings.gap} 秒</span></div>
+      <input type="range" min="1" max="10" step="1" value="${settings.gap}" data-set="gap">
+      <label class="check" style="justify-content:flex-start"><input type="checkbox" data-set="readPunct" ${settings.readPunct ? 'checked' : ''}> 讀出標點符號（逗號、句號…）<br><span class="muted small">Read punctuation aloud</span></label>
+    </div>
+    <div class="card">
+      <h3>💾 備份 Backup</h3>
+      <p class="muted small" style="margin-top:0">默書只儲存在這部裝置。要傳到另一部裝置，可在主頁按「🔗 分享」，或在這裏匯出／匯入。<br>Lists are saved on this device only. Use Share, or export / import a backup.</p>
+      <div class="row">
+        <button class="btn ghost sm" data-act="export">⬇️ 匯出 Export</button>
+        <button class="btn ghost sm" data-act="import">⬆️ 匯入 Import</button>
+      </div>
+    </div>`;
+}
+
+/* ---------- session ---------- */
+function newSession(meta, items){
+  session = {listId: meta.listId, name: meta.name, lang: meta.lang, all: meta.all || items.slice(), retry: !!meta.retry, items: items.slice(), pos: -1, marks: []};
+}
+function saveScore(){
+  if(!session || session.retry) return;
+  const l = lists.find(x => x.id === session.listId);
+  if(!l) return;
+  const t = tally();
+  if(t.r + t.x === 0) return;
+  l.last = {r: t.r, t: t.n, d: Date.now()};
+  saveLists();
+}
+function celebrate(){
+  const em = ['🎉','⭐','🌟','✨','🎊','💯','🏆'];
+  for(let k = 0; k < 40; k++){
+    const s = document.createElement('span');
+    s.className = 'confetti'; s.textContent = em[k % em.length];
+    s.style.left = (Math.random() * 100) + 'vw';
+    s.style.animationDelay = (Math.random() * 0.8) + 's';
+    s.style.fontSize = (20 + Math.random() * 24) + 'px';
+    document.body.appendChild(s); setTimeout(() => s.remove(), 3800);
+  }
+}
+
+/* ---------- actions ---------- */
+function act(name, id, el){
+  switch(name){
+    case 'home': go('home'); break;
+    case 'settings': go('settings'); break;
+    case 'new':
+      editing = {id: null, name: '默書 ' + today(), lang: settings.lastLang || 'zh', text: ''};
+      go('edit'); break;
+    case 'edit': {
+      const l = lists.find(x => x.id === id); if(!l) return;
+      editing = {id: l.id, name: l.name, lang: l.lang, text: l.text};
+      go('edit'); break;
+    }
+    case 'save': {
+      const name = $('#f-name').value.trim() || ('默書 ' + today());
+      const langEl = document.querySelector('input[name=lang]:checked');
+      const lang = langEl ? langEl.value : 'zh';
+      const text = parseItems($('#f-text').value).join('\n');
+      if(!text){ toast('請輸入默書內容 Please add some items'); return; }
+      if(editing.id){
+        const l = lists.find(x => x.id === editing.id);
+        if(l) Object.assign(l, {name, lang, text, updated: Date.now()});
+      } else {
+        lists.push({id: uid(), name, lang, text, updated: Date.now()});
+      }
+      settings.lastLang = lang; saveSettings(); saveLists();
+      go('home'); toast('✅ 已儲存 Saved'); break;
+    }
+    case 'del': {
+      const l = lists.find(x => x.id === id); if(!l) return;
+      if(confirm('刪除「' + l.name + '」？\nDelete this list?')){
+        lists = lists.filter(x => x.id !== id); saveLists(); render(); toast('已刪除 Deleted');
+      }
+      break;
+    }
+    case 'share': {
+      const l = lists.find(x => x.id === id); if(!l) return;
+      const url = location.origin + location.pathname + '#s=' + b64e(JSON.stringify({n: l.name, l: l.lang, t: l.text}));
+      if(navigator.share){
+        navigator.share({title: '默書：' + l.name, url}).catch(() => {});
+      } else if(navigator.clipboard && window.isSecureContext){
+        navigator.clipboard.writeText(url).then(() => toast('🔗 已複製連結 Link copied'), () => prompt('複製這條連結 Copy this link:', url));
+      } else prompt('複製這條連結 Copy this link:', url);
+      break;
+    }
+    case 'play': {
+      const l = lists.find(x => x.id === id); if(!l) return;
+      newSession({listId: l.id, name: l.name, lang: l.lang}, parseItems(l.text));
+      go('practice'); break;
+    }
+    case 'begin': {
+      const items = session.items.slice();
+      if(settings.shuffle) shuffle(items);
+      session.items = items; session.pos = 0; session.marks = items.map(() => null);
+      requestWake(); render(); say(session.items[0], session.lang); break;
+    }
+    case 'repeat': if(session && session.pos >= 0) say(session.items[session.pos], session.lang); break;
+    case 'slow': if(session && session.pos >= 0) say(session.items[session.pos], session.lang, {slow: true, times: 1}); break;
+    case 'next':
+      if(session.pos < session.items.length - 1){ stopSpeech(); session.pos++; render(); say(session.items[session.pos], session.lang); }
+      break;
+    case 'prev':
+      if(session.pos > 0){ stopSpeech(); session.pos--; render(); say(session.items[session.pos], session.lang); }
+      break;
+    case 'finish': go('check'); break;
+    case 'exit':
+      if(session && session.pos >= 0 && !confirm('要離開嗎？\nLeave this dictation?')) return;
+      go('home'); break;
+    case 'hear': say(session.items[+id], session.lang, {times: 1}); break;
+    case 'mark': {
+      const i = +id, v = el.dataset.v;
+      const wasPerfect = (() => { const t = tally(); return t.r === t.n; })();
+      session.marks[i] = session.marks[i] === v ? null : v;
+      saveScore(); render();
+      const t = tally();
+      if(t.r === t.n && !wasPerfect){
+        celebrate();
+        say(session.lang === 'zh' ? '全部正確，好叻呀！' : 'All correct. Well done!', session.lang, {times: 1});
+      }
+      break;
+    }
+    case 'retryWrong': {
+      const wrong = session.items.filter((_, i) => session.marks[i] === 'x');
+      newSession({listId: session.listId, name: session.name, lang: session.lang, all: session.all, retry: true}, wrong);
+      go('practice'); render(); break;
+    }
+    case 'retryAll': {
+      const l = lists.find(x => x.id === session.listId);
+      const items = l ? parseItems(l.text) : session.all;
+      newSession({listId: session.listId, name: l ? l.name : session.name, lang: session.lang}, items);
+      view = 'check'; go('practice'); break;
+    }
+    case 'test':
+      say(id === 'zh' ? '我今天和媽媽去公園玩。' : 'library | I borrow books from the library.', id, {times: 1}); break;
+    case 'export': {
+      const blob = new Blob([JSON.stringify({app: 'dictation', version: 1, lists}, null, 2)], {type: 'application/json'});
+      const a = document.createElement('a');
+      const d = new Date();
+      a.href = URL.createObjectURL(blob);
+      a.download = `dictation-backup-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      break;
+    }
+    case 'import': $('#importFile').click(); break;
+  }
+}
+
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if(!b || b.disabled) return;
+  if(b.tagName === 'A') e.preventDefault();
+  act(b.dataset.act, b.dataset.id, b);
+});
+function onSetting(e){
+  const el = e.target, k = el.dataset && el.dataset.set;
+  if(!k) return;
+  let v = el.type === 'checkbox' ? el.checked : el.value;
+  if(['rateZh', 'rateEn', 'gap', 'repeat'].includes(k)) v = parseFloat(v);
+  settings[k] = v; saveSettings();
+  const lbl = document.getElementById('lbl-' + k);
+  if(lbl) lbl.textContent = k === 'gap' ? v + ' 秒' : v.toFixed(2) + '×';
+}
+app.addEventListener('input', e => {
+  if(e.target.id === 'f-text'){ const c = $('#f-count'); if(c) c.textContent = parseItems(e.target.value).length; return; }
+  if(e.target.type === 'range') onSetting(e);
+});
+app.addEventListener('change', onSetting);
+
+$('#importFile').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const data = JSON.parse(r.result);
+      const incoming = Array.isArray(data) ? data : data.lists;
+      if(!Array.isArray(incoming)) throw new Error('bad');
+      let added = 0;
+      incoming.forEach(l => {
+        if(!l || !l.text) return;
+        const clean = {id: l.id || uid(), name: String(l.name || '默書'), lang: l.lang === 'en' ? 'en' : 'zh', text: String(l.text), updated: l.updated || Date.now(), last: l.last};
+        const i = lists.findIndex(x => x.id === clean.id);
+        if(i >= 0) lists[i] = clean; else lists.push(clean);
+        added++;
+      });
+      saveLists(); toast(`✅ 已匯入 ${added} 個默書 Imported`); go('home');
+    }catch(err){ toast('⚠️ 檔案無效 Invalid file'); }
+    e.target.value = '';
+  };
+  r.readAsText(f);
+});
+
+document.addEventListener('keydown', e => {
+  if(view !== 'practice' || !session || session.pos < 0) return;
+  if(e.target.matches && e.target.matches('input,textarea,select')) return;
+  if(e.code === 'Space'){ e.preventDefault(); act('repeat'); }
+  else if(e.key === 'ArrowRight'){ act(session.pos === session.items.length - 1 ? 'finish' : 'next'); }
+  else if(e.key === 'ArrowLeft'){ act('prev'); }
+});
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden) stopSpeech();
+  else if(view === 'practice' && session && session.pos >= 0) requestWake();
+});
+
+/* ---------- import from share link ---------- */
+function checkHash(){
+  const m = location.hash.match(/^#s=(.+)$/);
+  if(!m) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  try{
+    const d = JSON.parse(b64d(m[1]));
+    if(!d || !d.t) throw new Error('bad');
+    const name = String(d.n || '默書'), text = String(d.t), lang = d.l === 'en' ? 'en' : 'zh';
+    if(lists.some(x => x.name === name && x.text === text)){ toast('已經有這個默書 Already added'); return; }
+    if(confirm('加入默書「' + name + '」？（' + parseItems(text).length + ' 項）\nAdd this list?')){
+      lists.push({id: uid(), name, lang, text, updated: Date.now()});
+      saveLists(); render(); toast('✅ 已加入 Added');
+    }
+  }catch(e){ toast('⚠️ 連結無效 Invalid link'); }
+}
+
+render();
+checkHash();
+})();
+</script>
+</body>
+</html>
