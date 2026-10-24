@@ -57,6 +57,7 @@ h3{font-size:18px;margin:0 0 12px}
 .list .tools{margin-top:14px;padding-top:12px;border-top:2px dashed var(--line)}
 .badge{display:inline-block;font-size:13px;font-weight:800;padding:2px 10px;border-radius:999px;background:#ffe9d6;color:var(--orange-d);vertical-align:1px}
 .badge.en{background:#e1ecff;color:var(--blue-d)}
+.badge.gh{background:#ecebf5;color:#4a4e69}
 .empty p{margin:6px 0}
 
 /* editor */
@@ -167,6 +168,35 @@ const saveLists = () => store.set('cm.lists', lists);
 const saveSettings = () => store.set('cm.settings', settings);
 let view = 'home', editing = null, session = null;
 
+/* lists published on GitHub (cm/lists.json) — cached so they work offline */
+let remote = store.get('cm.remote', []);
+let scores = store.get('cm.scores', {});
+function remoteLists(){
+  return remote.map(r => ({
+    id: 'gh:' + r.id, name: r.name, lang: r.lang, text: r.items.join('\n'),
+    updated: Date.parse(r.date) || 0, remote: true, last: scores['gh:' + r.id]
+  }));
+}
+function allLists(){
+  const rl = remoteLists();
+  // hide device copies that are identical to a GitHub list
+  const local = lists.filter(l => !rl.some(r => r.name === l.name && r.text === parseItems(l.text).join('\n')));
+  return rl.concat(local);
+}
+const findList = id => allLists().find(x => x.id === id);
+function loadRemote(){
+  if(!window.fetch) return;
+  fetch('lists.json', {cache: 'no-cache'}).then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      if(!Array.isArray(data)) return;
+      remote = data.filter(r => r && r.id && Array.isArray(r.items) && r.items.length)
+        .map(r => ({id: String(r.id), name: String(r.name || r.id), lang: r.lang === 'en' ? 'en' : 'zh', date: r.date || '',
+                    items: r.items.map(s => String(s).trim()).filter(Boolean)}));
+      store.set('cm.remote', remote);
+      if(view === 'home') render();
+    }).catch(() => {});
+}
+
 /* ---------- speech ---------- */
 const HAS_TTS = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 let voices = [];
@@ -272,7 +302,7 @@ function render(){
 function langBadge(l){ return `<span class="badge ${l}">${l === 'zh' ? '中文' : 'English'}</span>`; }
 
 function viewHome(){
-  const sorted = lists.slice().sort((a, b) => (b.updated || 0) - (a.updated || 0));
+  const sorted = allLists().sort((a, b) => (b.updated || 0) - (a.updated || 0));
   const cards = sorted.map(l => {
     const n = parseItems(l.text).length;
     const sc = l.last ? ` · 上次 Last <b>${l.last.r}/${l.last.t}</b>${l.last.r === l.last.t ? ' ⭐' : ''}` : '';
@@ -280,15 +310,15 @@ function viewHome(){
       <div class="lhead">
         <div class="linfo">
           <div class="lname">${esc(l.name)}</div>
-          <div class="muted small">${langBadge(l.lang)} ${n} 項${sc}</div>
+          <div class="muted small">${langBadge(l.lang)}${l.remote ? ' <span class="badge gh">☁️ GitHub</span>' : ''} ${n} 項${sc}</div>
         </div>
         <button class="btn green" data-act="play" data-id="${l.id}">▶ 開始</button>
       </div>
-      <div class="row tools">
+      ${l.remote ? '' : `<div class="row tools">
         <button class="btn ghost sm" data-act="edit" data-id="${l.id}">✏️ 修改 Edit</button>
         <button class="btn ghost sm" data-act="share" data-id="${l.id}">🔗 分享 Share</button>
         <button class="btn ghost sm" data-act="del" data-id="${l.id}" aria-label="刪除 Delete">🗑️</button>
-      </div>
+      </div>`}
     </div>`;
   }).join('');
   return `<header class="top">
@@ -474,11 +504,13 @@ function newSession(meta, items){
 }
 function saveScore(){
   if(!session || session.retry) return;
-  const l = lists.find(x => x.id === session.listId);
-  if(!l) return;
   const t = tally();
   if(t.r + t.x === 0) return;
-  l.last = {r: t.r, t: t.n, d: Date.now()};
+  const last = {r: t.r, t: t.n, d: Date.now()};
+  if(String(session.listId).startsWith('gh:')){ scores[session.listId] = last; store.set('cm.scores', scores); return; }
+  const l = lists.find(x => x.id === session.listId);
+  if(!l) return;
+  l.last = last;
   saveLists();
 }
 function celebrate(){
@@ -539,7 +571,7 @@ function act(name, id, el){
       break;
     }
     case 'play': {
-      const l = lists.find(x => x.id === id); if(!l) return;
+      const l = findList(id); if(!l) return;
       newSession({listId: l.id, name: l.name, lang: l.lang}, parseItems(l.text));
       go('practice'); break;
     }
@@ -580,7 +612,7 @@ function act(name, id, el){
       go('practice'); render(); break;
     }
     case 'retryAll': {
-      const l = lists.find(x => x.id === session.listId);
+      const l = findList(session.listId);
       const items = l ? parseItems(l.text) : session.all;
       newSession({listId: session.listId, name: l ? l.name : session.name, lang: session.lang}, items);
       view = 'check'; go('practice'); break;
@@ -676,6 +708,7 @@ function checkHash(){
 
 render();
 checkHash();
+loadRemote();
 })();
 </script>
 </body>
