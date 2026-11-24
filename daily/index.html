@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="每日英文" />
+  <meta name="theme-color" content="#0f766e" />
+  <title>每日英文打卡 · Daily English</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f7f4ef;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --line: #e7e5e4;
+      --card: #ffffff;
+      --accent: #0f766e;
+      --accent-d: #0d5c56;
+      --accent-soft: #ccfbf1;
+      --amber: #d97706;
+      --amber-soft: #fef3c7;
+      --green: #16a34a;
+      --green-soft: #dcfce7;
+      --radius: 1rem;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "PingFang HK", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, #dbeafe 0%, transparent 42%),
+        radial-gradient(circle at bottom right, #fde68a 0%, transparent 38%),
+        var(--bg);
+      padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .wrap {
+      max-width: 26rem;
+      margin: 0 auto;
+    }
+
+  header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    .sub {
+      margin: 0.2rem 0 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .streak-pill {
+      flex-shrink: 0;
+      text-align: center;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.85rem;
+      padding: 0.45rem 0.65rem;
+      min-width: 4.5rem;
+    }
+
+    .streak-pill .num {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--amber);
+      line-height: 1.1;
+    }
+
+    .streak-pill .lbl {
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.35rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .tabs button {
+      flex: 1;
+      border: 0;
+      background: transparent;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.5rem 0.35rem;
+      border-radius: 999px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .tabs button.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.15rem;
+      margin-bottom: 0.85rem;
+      box-shadow: 0 6px 20px rgba(28, 25, 23, 0.04);
+    }
+
+    .date-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 0.4rem;
+      background: var(--accent-soft);
+      color: var(--accent);
+      margin-bottom: 0.65rem;
+    }
+
+    .word {
+      font-size: 1.85rem;
+      font-weight: 700;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--accent);
+      margin: 0 0 0.15rem;
+      letter-spacing: 0.01em;
+    }
+
+    .meaning {
+      margin: 0 0 1rem;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 0 0 0.35rem;
+    }
+
+    .expression {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 0 0 0.75rem;
+      line-height: 1.45;
+    }
+
+    .example {
+      margin: 0;
+      padding: 0.75rem 0.9rem;
+      background: var(--bg);
+      border-radius: 0.65rem;
+      border-left: 3px solid var(--accent);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    .task-box {
+      background: var(--amber-soft);
+      border: 1px solid #fcd34d;
+      border-radius: 0.75rem;
+      padding: 0.85rem 1rem;
+      margin-top: 1rem;
+    }
+
+    .task-box p {
+      margin: 0;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .task-box strong {
+      color: var(--amber);
+    }
+
+    textarea {
+      width: 100%;
+      font: inherit;
+      font-size: 1rem;
+      line-height: 1.55;
+      padding: 0.75rem 0.85rem;
+      border: 2px solid var(--line);
+      border-radius: 0.75rem;
+      background: #fffdf8;
+      resize: vertical;
+      min-height: 5.5rem;
+      margin-top: 0.65rem;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 0.85rem;
+      padding: 0.85rem 1rem;
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.06s, box-shadow 0.06s;
+    }
+
+    .btn:active { transform: translateY(2px); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 0 var(--accent-d);
+    }
+
+    .btn-primary:active { box-shadow: 0 1px 0 var(--accent-d); }
+
+    .btn-primary.done {
+      background: var(--green);
+      box-shadow: 0 4px 0 #15803d;
+    }
+
+    .btn-ghost {
+      background: var(--card);
+      color: var(--ink);
+      border: 2px solid var(--line);
+    }
+
+    .done-banner {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--green-soft);
+      border: 1px solid #86efac;
+      border-radius: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      margin-bottom: 0.85rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #166534;
+    }
+
+    .done-banner.show { display: flex; }
+
+    /* history */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .history-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.85rem;
+      padding: 0.75rem 0.9rem;
+      font: inherit;
+      cursor: pointer;
+      color: inherit;
+    }
+
+    .history-item:active { background: var(--accent-soft); }
+
+    .history-item .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .history-item .d {
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .history-item .w {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .dot-done {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+
+    .dot-pending {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: var(--line);
+      flex-shrink: 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 0.75rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(1.25rem + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: #fff;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>每日英文打卡</h1>
+        <p class="sub">Daily English · 小三寫作好詞句</p>
+      </div>
+      <div class="streak-pill" title="連續打卡天數">
+        <span class="num" id="streakNum">0</span>
+        <span class="lbl">🔥 連續天數</span>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button type="button" class="active" data-tab="today" role="tab">今日</button>
+      <button type="button" data-tab="history" role="tab">往日</button>
+    </nav>
+
+    <section id="panelToday" class="panel active" role="tabpanel">
+      <div id="doneBanner" class="done-banner" aria-live="polite">
+        <span>✅</span>
+        <span>今日已完成！明天見～</span>
+      </div>
+      <div id="todayCard"></div>
+    </section>
+
+    <section id="panelHistory" class="panel" role="tabpanel" hidden>
+      <p class="sub" style="margin: 0 0 0.75rem">點選日期可重新溫習該天的內容。</p>
+      <div id="historyList" class="history-list"></div>
+    </section>
+
+    <section id="panelDay" class="panel" role="tabpanel" hidden>
+      <a href="#" class="back-link" id="backFromDay">← 返回列表</a>
+      <div id="dayCard"></div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const STORAGE_KEY = "daily-english-checkin-v1";
+      const ANCHOR = new Date(2024, 0, 1);
+
+      const DAYS = [
+        { word: "classroom", meaning: "課室", expression: "in the classroom", example: "We keep our classroom clean and tidy.", theme: "school" },
+        { word: "homework", meaning: "功課", expression: "do my homework", example: "I do my homework after dinner.", theme: "school" },
+        { word: "careful", meaning: "小心的", expression: "be careful", example: "Be careful when you cross the road.", theme: "school" },
+        { word: "together", meaning: "一起", expression: "work together", example: "We work together on the group project.", theme: "school" },
+        { word: "proud", meaning: "自豪的", expression: "feel proud", example: "I feel proud of my good work.", theme: "feelings" },
+        { word: "helpful", meaning: "樂於助人的", expression: "be helpful", example: "My sister is very helpful at home.", theme: "family" },
+        { word: "delicious", meaning: "美味的", expression: "a delicious meal", example: "Mum cooked a delicious meal for us.", theme: "family" },
+        { word: "tidy", meaning: "整潔的", expression: "keep tidy", example: "Please keep your desk tidy.", theme: "school" },
+        { word: "excited", meaning: "興奮的", expression: "feel excited", example: "I feel excited about the school picnic.", theme: "feelings" },
+        { word: "polite", meaning: "有禮貌的", expression: "be polite", example: "We should be polite to our teachers.", theme: "school" },
+        { word: "share", meaning: "分享", expression: "share with others", example: "I like to share my snacks with friends.", theme: "school" },
+        { word: "weekend", meaning: "週末", expression: "at the weekend", example: "At the weekend, we visit my grandparents.", theme: "weekend" },
+        { word: "outside", meaning: "在外面", expression: "play outside", example: "We play outside when the weather is fine.", theme: "weekend" },
+        { word: "library", meaning: "圖書館", expression: "go to the library", example: "I go to the library to borrow books.", theme: "school" },
+        { word: "worried", meaning: "擔心的", expression: "feel worried", example: "Don't feel worried. I can help you.", theme: "feelings" },
+        { word: "friendly", meaning: "友善的", expression: "be friendly", example: "The new student is friendly to everyone.", theme: "school" },
+        { word: "prepare", meaning: "準備", expression: "prepare for", example: "I prepare for the English test every night.", theme: "school" },
+        { word: "breakfast", meaning: "早餐", expression: "have breakfast", example: "I have breakfast with my family.", theme: "family" },
+        { word: "comfortable", meaning: "舒服的", expression: "feel comfortable", example: "I feel comfortable in my new shoes.", theme: "feelings" },
+        { word: "beautiful", meaning: "美麗的", expression: "a beautiful park", example: "We walked in a beautiful park on Sunday.", theme: "weekend" },
+        { word: "patient", meaning: "有耐心的", expression: "be patient", example: "Please be patient when you wait in line.", theme: "school" },
+        { word: "surprised", meaning: "驚訝的", expression: "feel surprised", example: "I feel surprised by the lovely gift.", theme: "feelings" },
+        { word: "collect", meaning: "收集", expression: "collect stamps", example: "My brother likes to collect stamps.", theme: "weekend" },
+        { word: "important", meaning: "重要的", expression: "it is important to", example: "It is important to drink enough water.", theme: "school" },
+        { word: "bored", meaning: "覺得無聊的", expression: "feel bored", example: "I feel bored when it rains all day.", theme: "feelings" },
+        { word: "visit", meaning: "探訪", expression: "visit my cousin", example: "We visit my cousin at the weekend.", theme: "family" },
+        { word: "quiet", meaning: "安靜的", expression: "keep quiet", example: "Please keep quiet in the reading corner.", theme: "school" },
+        { word: "enjoy", meaning: "享受", expression: "enjoy doing", example: "I enjoy playing badminton with Dad.", theme: "weekend" },
+        { word: "brave", meaning: "勇敢的", expression: "be brave", example: "Be brave and try your best.", theme: "feelings" },
+        { word: "celebrate", meaning: "慶祝", expression: "celebrate a birthday", example: "We celebrate Grandma's birthday at home.", theme: "family" },
+        { word: "listen", meaning: "聆聽", expression: "listen carefully", example: "Listen carefully to the teacher.", theme: "school" },
+        { word: "hungry", meaning: "肚餓的", expression: "feel hungry", example: "I feel hungry after PE lesson.", theme: "feelings" },
+        { word: "picnic", meaning: "野餐", expression: "have a picnic", example: "We have a picnic in the country park.", theme: "weekend" },
+        { word: "practice", meaning: "練習", expression: "practice every day", example: "I practice spelling every day.", theme: "school" },
+        { word: "grateful", meaning: "感激的", expression: "feel grateful", example: "I feel grateful for my kind family.", theme: "family" }
+      ];
+
+      const store = {
+        load() {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : { completed: {}, sentences: {} };
+          } catch (e) {
+            return { completed: {}, sentences: {} };
+          }
+        },
+        save(data) {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          } catch (e) {
+            toast("未能儲存進度");
+          }
+        }
+      };
+
+      function pad(n) {
+        return String(n).padStart(2, "0");
+      }
+
+      function localDateKey(d) {
+        return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+      }
+
+      function parseDateKey(key) {
+        const [y, m, day] = key.split("-").map(Number);
+        return new Date(y, m - 1, day);
+      }
+
+      function formatDisplay(key) {
+        const d = parseDateKey(key);
+        const week = ["日", "一", "二", "三", "四", "五", "六"][d.getDay()];
+        return d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日（星期" + week + "）";
+      }
+
+      /** Same calendar day always maps to the same lesson; cycles every DAYS.length days. */
+      function contentIndexForDate(d) {
+        const midnight = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const diff = Math.floor((midnight - ANCHOR) / 86400000);
+        return ((diff % DAYS.length) + DAYS.length) % DAYS.length;
+      }
+
+      function getLesson(key) {
+        return DAYS[contentIndexForDate(parseDateKey(key))];
+      }
+
+      function taskText(lesson) {
+        return "用今日詞語 <strong>" + lesson.word + "</strong> 或片語 <strong>" + lesson.expression + "</strong> 寫一句英文。";
+      }
+
+      function computeStreak(completed) {
+        const today = new Date();
+        let streak = 0;
+        let d = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const todayKey = localDateKey(d);
+        if (!completed[todayKey]) {
+          d.setDate(d.getDate() - 1);
+        }
+        while (completed[localDateKey(d)]) {
+          streak += 1;
+          d.setDate(d.getDate() - 1);
+        }
+        return streak;
+      }
+
+      function toast(msg) {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.add("show");
+        clearTimeout(toast._t);
+        toast._t = setTimeout(function () {
+          el.classList.remove("show");
+        }, 2200);
+      }
+
+      function renderCard(targetId, dateKey, options) {
+        const opts = options || {};
+        const isToday = opts.isToday;
+        const lesson = getLesson(dateKey);
+        const data = store.load();
+        const done = !!data.completed[dateKey];
+        const sentence = data.sentences[dateKey] || "";
+
+        const html =
+          '<article class="card">' +
+          '<span class="date-badge">' + formatDisplay(dateKey) + "</span>" +
+          '<p class="section-label">今日詞語 Word</p>' +
+          '<h2 class="word">' + lesson.word + "</h2>" +
+          '<p class="meaning">中文：' + lesson.meaning + "</p>" +
+          '<p class="section-label">寫作片語 Expression</p>' +
+          '<p class="expression">' + lesson.expression + "</p>" +
+          '<p class="section-label">例句 Example</p>' +
+          '<p class="example">' + lesson.example + "</p>" +
+          '<div class="task-box"><p class="section-label" style="margin-bottom:0.4rem">小任務 Task</p><p>' +
+          taskText(lesson) +
+          "</p></div>" +
+          (isToday
+            ? '<label class="section-label" for="sentenceBox" style="display:block;margin-top:1rem">我的句子 My sentence</label>' +
+              '<textarea id="sentenceBox" placeholder="Type your sentence here…">' +
+              escapeHtml(sentence) +
+              "</textarea>"
+            : sentence
+              ? '<p class="section-label" style="margin-top:1rem">當日句子</p><p class="example" style="font-style:normal">' +
+                escapeHtml(sentence) +
+                "</p>"
+              : "") +
+          "</article>";
+
+        document.getElementById(targetId).innerHTML = html;
+
+        if (isToday) {
+          const banner = document.getElementById("doneBanner");
+          const btn = document.getElementById("doneBtn");
+          if (done) banner.classList.add("show");
+          else banner.classList.remove("show");
+          if (btn) {
+            btn.textContent = done ? "✓ 已完成（再按可取消）" : "完成今日打卡";
+            btn.classList.toggle("done", done);
+          }
+          const box = document.getElementById("sentenceBox");
+          if (box) {
+            box.addEventListener("input", function () {
+              const d = store.load();
+              d.sentences[dateKey] = box.value;
+              store.save(d);
+            });
+          }
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function renderToday() {
+        const key = localDateKey(new Date());
+        const data = store.load();
+        const done = !!data.completed[key];
+        const lesson = getLesson(key);
+
+        document.getElementById("todayCard").innerHTML =
+          '<div id="innerToday"></div>' +
+          '<div class="btn-row">' +
+          '<button type="button" class="btn btn-primary' +
+          (done ? " done" : "") +
+          '" id="doneBtn">' +
+          (done ? "✓ 已完成（再按可取消）" : "完成今日打卡") +
+          "</button>" +
+          "</div>";
+
+        renderCard("innerToday", key, { isToday: true });
+
+        document.getElementById("doneBtn").addEventListener("click", function () {
+          const d = store.load();
+          const k = localDateKey(new Date());
+          d.completed[k] = !d.completed[k];
+          if (!d.completed[k]) delete d.completed[k];
+          const box = document.getElementById("sentenceBox");
+          if (box && box.value.trim()) d.sentences[k] = box.value.trim();
+          store.save(d);
+          updateStreak();
+          renderToday();
+          if (d.completed[k]) toast("太棒了！🔥");
+        });
+      }
+
+      function renderHistory() {
+        const list = document.getElementById("historyList");
+        const data = store.load();
+        const items = [];
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+        for (let i = 0; i < 45; i++) {
+          const d = new Date(start);
+          d.setDate(d.getDate() - i);
+          const key = localDateKey(d);
+          const lesson = getLesson(key);
+          items.push({ key: key, lesson: lesson, done: !!data.completed[key] });
+        }
+        list.innerHTML = items
+          .map(function (item) {
+            return (
+              '<button type="button" class="history-item" data-key="' +
+              item.key +
+              '">' +
+              '<div class="top"><span class="d">' +
+              formatDisplay(item.key) +
+              "</span>" +
+              '<span class="' +
+              (item.done ? "dot-done" : "dot-pending") +
+              '" title="' +
+              (item.done ? "已完成" : "未完成") +
+              '"></span></div>' +
+              '<div class="w">' +
+              item.lesson.word +
+              " · " +
+              item.lesson.expression +
+              "</div></button>"
+            );
+          })
+          .join("");
+
+        list.querySelectorAll(".history-item").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            openDay(btn.getAttribute("data-key"));
+          });
+        });
+      }
+
+      function openDay(key) {
+        showPanel("day");
+        renderCard("dayCard", key, { isToday: false });
+      }
+
+      function showPanel(name) {
+        const panels = { today: "panelToday", history: "panelHistory", day: "panelDay" };
+        Object.keys(panels).forEach(function (p) {
+          const el = document.getElementById(panels[p]);
+          const active = p === name;
+          el.classList.toggle("active", active);
+          el.hidden = !active;
+        });
+        document.querySelectorAll(".tabs button").forEach(function (btn) {
+          btn.classList.toggle("active", btn.getAttribute("data-tab") === (name === "day" ? "history" : name));
+        });
+      }
+
+      function updateStreak() {
+        document.getElementById("streakNum").textContent = String(computeStreak(store.load().completed));
+      }
+
+      document.querySelectorAll(".tabs button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          showPanel(btn.getAttribute("data-tab"));
+          if (btn.getAttribute("data-tab") === "history") renderHistory();
+        });
+      });
+
+      document.getElementById("backFromDay").addEventListener("click", function (e) {
+        e.preventDefault();
+        showPanel("history");
+        renderHistory();
+      });
+
+      renderToday();
+      updateStreak();
+    })();
+  </script>
+</body>
+</html>
