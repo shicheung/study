@@ -376,7 +376,7 @@
     <header>
       <div>
         <h1>每日英文打卡</h1>
-        <p class="sub">Daily English · 學年每天 3 個寫作好詞句</p>
+        <p class="sub">Daily English · 全年 365 日詞彙與寫作計劃</p>
       </div>
       <div class="streak-pill" title="連續打卡天數">
         <span class="num" id="streakNum">0</span>
@@ -420,12 +420,11 @@
       const BANK_DAYS = window.DAILY_SCHOOL_BANK_DAYS || BANK.length;
 
       const PLACEHOLDER_LESSON = {
-        items: [
-          { text: "ready", meaning: "準備好的" },
-          { text: "new school year", meaning: "新學年" },
-          { text: "fresh start", meaning: "重新出發" }
-        ],
-        example: "A new school year is a fresh start — get ready to learn!"
+        kind: "review",
+        title: "新學年",
+        meaning: "九月一日開始新一年計劃",
+        example: "開學愉快！",
+        task: "準備好你的詞彙寶藏簿，從今天起每天打卡。",
       };
 
       const store = {
@@ -500,12 +499,36 @@
         return new Date(y, 8, 1);
       }
 
+      function isFeb29(d) {
+        return d.getMonth() === 1 && d.getDate() === 29;
+      }
+
+      function feb29SchoolIndex(startYear) {
+        const feb = new Date(startYear + 1, 1, 29);
+        return schoolDayIndex(feb);
+      }
+
+      /** Map school-year day index → plan entry (364 slots; day 365 uses last entry). */
+      function planIndexForSchoolDay(d) {
+        const startYear = schoolYearStartYear(d);
+        const sidx = schoolDayIndex(d);
+        const leap = isLeapSchoolYear(startYear);
+        if (leap && isFeb29(d) && LEAP_LESSON) return { leap: true };
+        let pidx = sidx;
+        if (leap && sidx > feb29SchoolIndex(startYear)) pidx -= 1;
+        if (pidx < 0) return { leap: false, index: 0 };
+        if (pidx >= BANK.length) pidx = BANK.length - 1;
+        return { leap: false, index: pidx };
+      }
+
       function getLesson(key) {
         const d = parseDateKey(key);
         const idx = schoolDayIndex(d);
         const max = daysInSchoolYear(schoolYearStartYear(d));
-        if (idx < 0 || idx >= max || idx >= BANK.length) return PLACEHOLDER_LESSON;
-        return BANK[idx] || PLACEHOLDER_LESSON;
+        if (idx < 0 || idx >= max) return PLACEHOLDER_LESSON;
+        const map = planIndexForSchoolDay(d);
+        if (map.leap) return LEAP_LESSON || PLACEHOLDER_LESSON;
+        return BANK[map.index] || PLACEHOLDER_LESSON;
       }
 
       function schoolDayLabel(key) {
@@ -515,43 +538,51 @@
         return schoolYearLabel(schoolYearStartYear(d)) + " · 第 " + (idx + 1) + " 天";
       }
 
-      function itemsHtml(lesson) {
+      function kindLabel(kind) {
+        if (kind === "learn") return "新詞語 · New word";
+        if (kind === "review") return "週六複習 · Review";
+        return "週日小寫作 · Writing";
+      }
+
+      function lessonBodyHtml(lesson) {
+        if (lesson.kind === "learn") {
+          const pos = lesson.pos ? " (" + escapeHtml(lesson.pos) + ")" : "";
+          return (
+            '<div class="item-row">' +
+            '<p class="item-text">' +
+            escapeHtml(lesson.title) +
+            pos +
+            "</p>" +
+            '<p class="item-meaning">中文：' +
+            escapeHtml(lesson.meaning) +
+            "</p>" +
+            (lesson.upgradeFrom
+              ? '<p class="item-meaning" style="margin-top:0.35rem">升級替換：<em style="font-style:normal;color:var(--ink)">' +
+                escapeHtml(lesson.upgradeFrom) +
+                "</em></p>"
+              : "") +
+            "</div>"
+          );
+        }
         return (
-          '<div class="items-grid">' +
-          lesson.items
-            .map(function (item, i) {
-              return (
-                '<div class="item-row">' +
-                '<p class="item-text">' +
-                (i + 1) +
-                ". " +
-                escapeHtml(item.text) +
-                "</p>" +
-                '<p class="item-meaning">中文：' +
-                escapeHtml(item.meaning) +
-                "</p></div>"
-              );
-            })
-            .join("") +
-          "</div>"
+          '<div class="item-row">' +
+          '<p class="item-text">' +
+          escapeHtml(lesson.title || "今日任務") +
+          "</p>" +
+          '<p class="item-meaning">' +
+          escapeHtml(lesson.meaning || "") +
+          "</p></div>"
         );
       }
 
       function taskText(lesson) {
-        const labels = lesson.items
-          .map(function (item) {
-            return "<strong>" + escapeHtml(item.text) + "</strong>";
-          })
-          .join("、");
-        return "用今日其中一個或以上的詞語寫一句英文（可選：" + labels + "）。";
+        return escapeHtml(lesson.task || "");
       }
 
       function historyPreview(lesson) {
-        return lesson.items
-          .map(function (item) {
-            return item.text;
-          })
-          .join(" · ");
+        if (lesson.kind === "learn") return lesson.title || "";
+        if (lesson.weekday === "Leap") return "29 Feb 複習";
+        return (lesson.weekday || "") + " · " + (lesson.kind === "review" ? "複習" : "寫作");
       }
 
       function computeStreak(completed) {
@@ -589,16 +620,25 @@
           '<article class="card">' +
           '<span class="date-badge">' + formatDisplay(dateKey) + "</span>" +
           '<p class="sub" style="margin:0 0 0.75rem;font-size:0.82rem">' + escapeHtml(schoolDayLabel(dateKey)) + "</p>" +
-          '<p class="section-label">今日三項 · 3 words / phrases</p>' +
-          itemsHtml(lesson) +
-          '<p class="section-label">例句 Example</p>' +
-          '<p class="example">' + escapeHtml(lesson.example) + "</p>" +
+          '<p class="section-label">' +
+          escapeHtml(kindLabel(lesson.kind)) +
+          (lesson.week ? " · Week " + lesson.week : "") +
+          "</p>" +
+          lessonBodyHtml(lesson) +
+          (lesson.example
+            ? '<p class="section-label">例句 / 提示 Example</p><p class="example">' +
+              escapeHtml(lesson.example) +
+              "</p>"
+            : "") +
           '<div class="task-box"><p class="section-label" style="margin-bottom:0.4rem">小任務 Task</p><p>' +
           taskText(lesson) +
           "</p></div>" +
           (isToday
-            ? '<label class="section-label" for="sentenceBox" style="display:block;margin-top:1rem">我的句子 My sentence</label>' +
-              '<textarea id="sentenceBox" placeholder="Type your sentence here…">' +
+            ? '<label class="section-label" for="sentenceBox" style="display:block;margin-top:1rem">' +
+              (lesson.kind === "writing" ? "我的段落 My writing" : "我的句子 My sentence") +
+              '</label><textarea id="sentenceBox" placeholder="' +
+              (lesson.kind === "writing" ? "Write 3–5 sentences here…" : "Type your sentence here…") +
+              '">' +
               escapeHtml(sentence) +
               "</textarea>"
             : sentence
