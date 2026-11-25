@@ -376,7 +376,7 @@
     <header>
       <div>
         <h1>每日英文打卡</h1>
-        <p class="sub">Daily English · 每天 3 個寫作好詞句</p>
+        <p class="sub">Daily English · 學年每天 3 個寫作好詞句</p>
       </div>
       <div class="streak-pill" title="連續打卡天數">
         <span class="num" id="streakNum">0</span>
@@ -398,7 +398,7 @@
     </section>
 
     <section id="panelHistory" class="panel" role="tabpanel" hidden>
-      <p class="sub" style="margin: 0 0 0.75rem">點選日期可重新溫習該天的內容。</p>
+      <p class="sub" style="margin: 0 0 0.75rem">本學年（9月1日起）已過的日子，點選可溫習。</p>
       <div id="historyList" class="history-list"></div>
     </section>
 
@@ -410,263 +410,23 @@
 
   <div id="toast" class="toast" aria-live="polite"></div>
 
+  <script src="lessons.js"></script>
   <script>
     (function () {
       "use strict";
 
       const STORAGE_KEY = "daily-english-checkin-v1";
-      const ANCHOR = new Date(2024, 0, 1);
+      const BANK = window.DAILY_SCHOOL_BANK || [];
+      const BANK_DAYS = window.DAILY_SCHOOL_BANK_DAYS || BANK.length;
 
-      const DAYS = [
-        {
-          items: [
-            { text: "concentrate", meaning: "專心" },
-            { text: "pay attention", meaning: "留心聽／看" },
-            { text: "hard-working", meaning: "勤奮的" }
-          ],
-          example: "The hard-working pupils concentrate and pay attention during the lesson."
-        },
-        {
-          items: [
-            { text: "cooperate", meaning: "合作" },
-            { text: "in a team", meaning: "在團隊中" },
-            { text: "support each other", meaning: "互相支持" }
-          ],
-          example: "We cooperate in a team and support each other on the project."
-        },
-        {
-          items: [
-            { text: "organised", meaning: "有條理的" },
-            { text: "on time", meaning: "準時" },
-            { text: "hand in", meaning: "上交（功課）" }
-          ],
-          example: "She is organised, arrives on time, and hands in her homework early."
-        },
-        {
-          items: [
-            { text: "confident", meaning: "有信心的" },
-            { text: "try my best", meaning: "盡力而為" },
-            { text: "never give up", meaning: "永不放棄" }
-          ],
-          example: "I feel confident when I try my best and never give up."
-        },
-        {
-          items: [
-            { text: "nervous", meaning: "緊張的" },
-            { text: "take a deep breath", meaning: "深呼吸" },
-            { text: "calm down", meaning: "冷靜下來" }
-          ],
-          example: "Before the test, I felt nervous, but I took a deep breath and calmed down."
-        },
-        {
-          items: [
-            { text: "delighted", meaning: "非常開心的" },
-            { text: "proud of myself", meaning: "為自己自豪" },
-            { text: "well done", meaning: "做得好" }
-          ],
-          example: "I was delighted and proud of myself when the teacher said, \"Well done!\""
-        },
-        {
-          items: [
-            { text: "disappointed", meaning: "失望的" },
-            { text: "however", meaning: "然而" },
-            { text: "keep going", meaning: "繼續努力" }
-          ],
-          example: "I was disappointed with my score; however, I will keep going."
-        },
-        {
-          items: [
-            { text: "respect", meaning: "尊重" },
-            { text: "politely", meaning: "有禮貌地" },
-            { text: "raise my hand", meaning: "舉手" }
-          ],
-          example: "We respect our teachers and speak politely when we raise our hands."
-        },
-        {
-          items: [
-            { text: "curious", meaning: "好奇的" },
-            { text: "find out", meaning: "找出／查明" },
-            { text: "ask questions", meaning: "發問" }
-          ],
-          example: "I am curious, so I like to ask questions and find out more."
-        },
-        {
-          items: [
-            { text: "explain", meaning: "解釋" },
-            { text: "clearly", meaning: "清楚地" },
-            { text: "in detail", meaning: "詳細地" }
-          ],
-          example: "The monitor can explain the rules clearly and in detail."
-        },
-        {
-          items: [
-            { text: "helpful", meaning: "樂於助人的" },
-            { text: "take care of", meaning: "照顧" },
-            { text: "younger brother", meaning: "弟弟" }
-          ],
-          example: "At home, I am helpful and take care of my younger brother."
-        },
-        {
-          items: [
-            { text: "responsible", meaning: "有責任感的" },
-            { text: "chores", meaning: "家務" },
-            { text: "without being asked", meaning: "不用人提醒" }
-          ],
-          example: "I am responsible and do my chores without being asked."
-        },
-        {
-          items: [
-            { text: "grateful", meaning: "感激的" },
-            { text: "because of", meaning: "因為／由於" },
-            { text: "kindness", meaning: "善意" }
-          ],
-          example: "I feel grateful because of my parents' kindness."
-        },
-        {
-          items: [
-            { text: "quarrel", meaning: "爭吵" },
-            { text: "apologise", meaning: "道歉" },
-            { text: "make up", meaning: "和好" }
-          ],
-          example: "After a quarrel, we apologise and make up quickly."
-        },
-        {
-          items: [
-            { text: "memorable", meaning: "難忘的" },
-            { text: "family dinner", meaning: "家庭晚餐" },
-            { text: "chat together", meaning: "一起聊天" }
-          ],
-          example: "It was a memorable family dinner when we chatted together."
-        },
-        {
-          items: [
-            { text: "at the weekend", meaning: "在週末" },
-            { text: "explore", meaning: "探索" },
-            { text: "country park", meaning: "郊野公園" }
-          ],
-          example: "At the weekend, we explore the country park on foot."
-        },
-        {
-          items: [
-            { text: "breathtaking", meaning: "令人驚嘆的" },
-            { text: "scenery", meaning: "景色" },
-            { text: "take photos", meaning: "拍照" }
-          ],
-          example: "The scenery was breathtaking, so we took many photos."
-        },
-        {
-          items: [
-            { text: "exhausted", meaning: "筋疲力盡的" },
-            { text: "after a long hike", meaning: "走完長途後" },
-            { text: "refreshing", meaning: "提神的" }
-          ],
-          example: "After a long hike, I was exhausted but the drink was refreshing."
-        },
-        {
-          items: [
-            { text: "indoors", meaning: "在室內" },
-            { text: "board game", meaning: "桌上遊戲" },
-            { text: "laugh loudly", meaning: "大笑" }
-          ],
-          example: "It rained, so we stayed indoors and played a board game. We laughed loudly."
-        },
-        {
-          items: [
-            { text: "volunteer", meaning: "做義工" },
-            { text: "elderly", meaning: "長者" },
-            { text: "spread joy", meaning: "帶來歡樂" }
-          ],
-          example: "We volunteer to visit the elderly and spread joy."
-        },
-        {
-          items: [
-            { text: "generous", meaning: "慷慨的" },
-            { text: "donate", meaning: "捐贈" },
-            { text: "those in need", meaning: "有需要的人" }
-          ],
-          example: "Our school is generous and donates books to those in need."
-        },
-        {
-          items: [
-            { text: "environment", meaning: "環境" },
-            { text: "reduce waste", meaning: "減少浪費" },
-            { text: "recycle", meaning: "回收" }
-          ],
-          example: "We protect the environment when we reduce waste and recycle."
-        },
-        {
-          items: [
-            { text: "although", meaning: "雖然" },
-            { text: "challenging", meaning: "有挑戰性的" },
-            { text: "succeed", meaning: "成功" }
-          ],
-          example: "Although the task was challenging, we succeeded in the end."
-        },
-        {
-          items: [
-            { text: "suddenly", meaning: "突然" },
-            { text: "realise", meaning: "意識到" },
-            { text: "by accident", meaning: "意外地" }
-          ],
-          example: "Suddenly, I realised I had left my book at home by accident."
-        },
-        {
-          items: [
-            { text: "meanwhile", meaning: "與此同時" },
-            { text: "prepare", meaning: "準備" },
-            { text: "presentation", meaning: "匯報／展示" }
-          ],
-          example: "Meanwhile, my classmate prepared a wonderful presentation."
-        },
-        {
-          items: [
-            { text: "thrilled", meaning: "非常興奮的" },
-            { text: "invitation", meaning: "邀請" },
-            { text: "accept", meaning: "接受" }
-          ],
-          example: "I was thrilled to get an invitation and gladly accepted it."
-        },
-        {
-          items: [
-            { text: "embarrassed", meaning: "尷尬的" },
-            { text: "cheer me up", meaning: "令我振奮" },
-            { text: "encouraging words", meaning: "鼓勵的話" }
-          ],
-          example: "I felt embarrassed, but my friend's encouraging words cheered me up."
-        },
-        {
-          items: [
-            { text: "peaceful", meaning: "寧靜的" },
-            { text: "relax", meaning: "放鬆" },
-            { text: "after school", meaning: "放學後" }
-          ],
-          example: "After school, the library is peaceful and I can relax with a book."
-        },
-        {
-          items: [
-            { text: "delicious", meaning: "美味的" },
-            { text: "homemade", meaning: "自家製的" },
-            { text: "special treat", meaning: "特別的美食" }
-          ],
-          example: "Grandma made a delicious, homemade soup as a special treat."
-        },
-        {
-          items: [
-            { text: "improve", meaning: "改善／進步" },
-            { text: "step by step", meaning: "一步步" },
-            { text: "practice regularly", meaning: "定時練習" }
-          ],
-          example: "I improve step by step when I practice regularly."
-        },
-        {
-          items: [
-            { text: "determined", meaning: "堅定的" },
-            { text: "achieve", meaning: "達成" },
-            { text: "my goal", meaning: "我的目標" }
-          ],
-          example: "I am determined to achieve my goal this term."
-        }
-      ];
+      const PLACEHOLDER_LESSON = {
+        items: [
+          { text: "ready", meaning: "準備好的" },
+          { text: "new school year", meaning: "新學年" },
+          { text: "fresh start", meaning: "重新出發" }
+        ],
+        example: "A new school year is a fresh start — get ready to learn!"
+      };
 
       const store = {
         load() {
@@ -705,15 +465,54 @@
         return d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日（星期" + week + "）";
       }
 
-      /** Same calendar day always maps to the same lesson; cycles every DAYS.length days. */
-      function contentIndexForDate(d) {
-        const midnight = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        const diff = Math.floor((midnight - ANCHOR) / 86400000);
-        return ((diff % DAYS.length) + DAYS.length) % DAYS.length;
+      /** HK school year: 1 Sep (startYear) → 31 Aug (startYear + 1). */
+      function schoolYearStartYear(d) {
+        return d.getMonth() >= 8 ? d.getFullYear() : d.getFullYear() - 1;
+      }
+
+      function schoolYearLabel(startYear) {
+        const end = (startYear + 1) % 100;
+        return startYear + "–" + (end < 10 ? "0" : "") + end + " 學年";
+      }
+
+      function isLeapSchoolYear(startYear) {
+        const febYear = startYear + 1;
+        return (febYear % 4 === 0 && febYear % 100 !== 0) || febYear % 400 === 0;
+      }
+
+      function daysInSchoolYear(startYear) {
+        return isLeapSchoolYear(startYear) ? 366 : 365;
+      }
+
+      function midnightLocal(d) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      }
+
+      /** 0 = 1 Sep; 364/365 = 31 Aug. Same calendar date → same index every year. */
+      function schoolDayIndex(d) {
+        const startYear = schoolYearStartYear(d);
+        const anchor = new Date(startYear, 8, 1);
+        return Math.floor((midnightLocal(d) - anchor) / 86400000);
+      }
+
+      function schoolYearStartDate(d) {
+        const y = schoolYearStartYear(d);
+        return new Date(y, 8, 1);
       }
 
       function getLesson(key) {
-        return DAYS[contentIndexForDate(parseDateKey(key))];
+        const d = parseDateKey(key);
+        const idx = schoolDayIndex(d);
+        const max = daysInSchoolYear(schoolYearStartYear(d));
+        if (idx < 0 || idx >= max || idx >= BANK.length) return PLACEHOLDER_LESSON;
+        return BANK[idx] || PLACEHOLDER_LESSON;
+      }
+
+      function schoolDayLabel(key) {
+        const d = parseDateKey(key);
+        const idx = schoolDayIndex(d);
+        if (idx < 0) return "";
+        return schoolYearLabel(schoolYearStartYear(d)) + " · 第 " + (idx + 1) + " 天";
       }
 
       function itemsHtml(lesson) {
@@ -756,18 +555,16 @@
       }
 
       function computeStreak(completed) {
+        let count = 0;
         const today = new Date();
-        let streak = 0;
-        let d = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        const todayKey = localDateKey(d);
-        if (!completed[todayKey]) {
+        let d = midnightLocal(today);
+        if (!completed[localDateKey(d)]) d.setDate(d.getDate() - 1);
+        const yearStart = schoolYearStartDate(today).getTime();
+        while (d.getTime() >= yearStart && completed[localDateKey(d)]) {
+          count += 1;
           d.setDate(d.getDate() - 1);
         }
-        while (completed[localDateKey(d)]) {
-          streak += 1;
-          d.setDate(d.getDate() - 1);
-        }
-        return streak;
+        return count;
       }
 
       function toast(msg) {
@@ -791,6 +588,7 @@
         const html =
           '<article class="card">' +
           '<span class="date-badge">' + formatDisplay(dateKey) + "</span>" +
+          '<p class="sub" style="margin:0 0 0.75rem;font-size:0.82rem">' + escapeHtml(schoolDayLabel(dateKey)) + "</p>" +
           '<p class="section-label">今日三項 · 3 words / phrases</p>' +
           itemsHtml(lesson) +
           '<p class="section-label">例句 Example</p>' +
@@ -875,14 +673,13 @@
         const list = document.getElementById("historyList");
         const data = store.load();
         const items = [];
-        const start = new Date();
-        start.setHours(0, 0, 0, 0);
-        for (let i = 0; i < 45; i++) {
-          const d = new Date(start);
-          d.setDate(d.getDate() - i);
+        const today = midnightLocal(new Date());
+        const yearStart = schoolYearStartDate(today);
+        const d = new Date(today);
+        while (d.getTime() >= yearStart.getTime()) {
           const key = localDateKey(d);
-          const lesson = getLesson(key);
-          items.push({ key: key, lesson: lesson, done: !!data.completed[key] });
+          items.push({ key: key, lesson: getLesson(key), done: !!data.completed[key] });
+          d.setDate(d.getDate() - 1);
         }
         list.innerHTML = items
           .map(function (item) {
