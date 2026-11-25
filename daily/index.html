@@ -143,18 +143,32 @@
       margin-bottom: 0.65rem;
     }
 
-    .word {
-      font-size: 1.85rem;
+    .items-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+    }
+
+    .item-row {
+      padding: 0.65rem 0.75rem;
+      background: var(--bg);
+      border-radius: 0.65rem;
+      border: 1px solid var(--line);
+    }
+
+    .item-text {
+      font-size: 1.12rem;
       font-weight: 700;
       font-family: Georgia, "Times New Roman", serif;
       color: var(--accent);
-      margin: 0 0 0.15rem;
-      letter-spacing: 0.01em;
+      margin: 0 0 0.2rem;
+      line-height: 1.35;
     }
 
-    .meaning {
-      margin: 0 0 1rem;
-      font-size: 1rem;
+    .item-meaning {
+      margin: 0;
+      font-size: 0.9rem;
       color: var(--muted);
     }
 
@@ -165,13 +179,6 @@
       letter-spacing: 0.06em;
       color: var(--muted);
       margin: 0 0 0.35rem;
-    }
-
-    .expression {
-      font-size: 1.05rem;
-      font-weight: 600;
-      margin: 0 0 0.75rem;
-      line-height: 1.45;
     }
 
     .example {
@@ -369,7 +376,7 @@
     <header>
       <div>
         <h1>每日英文打卡</h1>
-        <p class="sub">Daily English · 小三寫作好詞句</p>
+        <p class="sub">Daily English · 每天 3 個寫作好詞句</p>
       </div>
       <div class="streak-pill" title="連續打卡天數">
         <span class="num" id="streakNum">0</span>
@@ -411,41 +418,254 @@
       const ANCHOR = new Date(2024, 0, 1);
 
       const DAYS = [
-        { word: "classroom", meaning: "課室", expression: "in the classroom", example: "We keep our classroom clean and tidy.", theme: "school" },
-        { word: "homework", meaning: "功課", expression: "do my homework", example: "I do my homework after dinner.", theme: "school" },
-        { word: "careful", meaning: "小心的", expression: "be careful", example: "Be careful when you cross the road.", theme: "school" },
-        { word: "together", meaning: "一起", expression: "work together", example: "We work together on the group project.", theme: "school" },
-        { word: "proud", meaning: "自豪的", expression: "feel proud", example: "I feel proud of my good work.", theme: "feelings" },
-        { word: "helpful", meaning: "樂於助人的", expression: "be helpful", example: "My sister is very helpful at home.", theme: "family" },
-        { word: "delicious", meaning: "美味的", expression: "a delicious meal", example: "Mum cooked a delicious meal for us.", theme: "family" },
-        { word: "tidy", meaning: "整潔的", expression: "keep tidy", example: "Please keep your desk tidy.", theme: "school" },
-        { word: "excited", meaning: "興奮的", expression: "feel excited", example: "I feel excited about the school picnic.", theme: "feelings" },
-        { word: "polite", meaning: "有禮貌的", expression: "be polite", example: "We should be polite to our teachers.", theme: "school" },
-        { word: "share", meaning: "分享", expression: "share with others", example: "I like to share my snacks with friends.", theme: "school" },
-        { word: "weekend", meaning: "週末", expression: "at the weekend", example: "At the weekend, we visit my grandparents.", theme: "weekend" },
-        { word: "outside", meaning: "在外面", expression: "play outside", example: "We play outside when the weather is fine.", theme: "weekend" },
-        { word: "library", meaning: "圖書館", expression: "go to the library", example: "I go to the library to borrow books.", theme: "school" },
-        { word: "worried", meaning: "擔心的", expression: "feel worried", example: "Don't feel worried. I can help you.", theme: "feelings" },
-        { word: "friendly", meaning: "友善的", expression: "be friendly", example: "The new student is friendly to everyone.", theme: "school" },
-        { word: "prepare", meaning: "準備", expression: "prepare for", example: "I prepare for the English test every night.", theme: "school" },
-        { word: "breakfast", meaning: "早餐", expression: "have breakfast", example: "I have breakfast with my family.", theme: "family" },
-        { word: "comfortable", meaning: "舒服的", expression: "feel comfortable", example: "I feel comfortable in my new shoes.", theme: "feelings" },
-        { word: "beautiful", meaning: "美麗的", expression: "a beautiful park", example: "We walked in a beautiful park on Sunday.", theme: "weekend" },
-        { word: "patient", meaning: "有耐心的", expression: "be patient", example: "Please be patient when you wait in line.", theme: "school" },
-        { word: "surprised", meaning: "驚訝的", expression: "feel surprised", example: "I feel surprised by the lovely gift.", theme: "feelings" },
-        { word: "collect", meaning: "收集", expression: "collect stamps", example: "My brother likes to collect stamps.", theme: "weekend" },
-        { word: "important", meaning: "重要的", expression: "it is important to", example: "It is important to drink enough water.", theme: "school" },
-        { word: "bored", meaning: "覺得無聊的", expression: "feel bored", example: "I feel bored when it rains all day.", theme: "feelings" },
-        { word: "visit", meaning: "探訪", expression: "visit my cousin", example: "We visit my cousin at the weekend.", theme: "family" },
-        { word: "quiet", meaning: "安靜的", expression: "keep quiet", example: "Please keep quiet in the reading corner.", theme: "school" },
-        { word: "enjoy", meaning: "享受", expression: "enjoy doing", example: "I enjoy playing badminton with Dad.", theme: "weekend" },
-        { word: "brave", meaning: "勇敢的", expression: "be brave", example: "Be brave and try your best.", theme: "feelings" },
-        { word: "celebrate", meaning: "慶祝", expression: "celebrate a birthday", example: "We celebrate Grandma's birthday at home.", theme: "family" },
-        { word: "listen", meaning: "聆聽", expression: "listen carefully", example: "Listen carefully to the teacher.", theme: "school" },
-        { word: "hungry", meaning: "肚餓的", expression: "feel hungry", example: "I feel hungry after PE lesson.", theme: "feelings" },
-        { word: "picnic", meaning: "野餐", expression: "have a picnic", example: "We have a picnic in the country park.", theme: "weekend" },
-        { word: "practice", meaning: "練習", expression: "practice every day", example: "I practice spelling every day.", theme: "school" },
-        { word: "grateful", meaning: "感激的", expression: "feel grateful", example: "I feel grateful for my kind family.", theme: "family" }
+        {
+          items: [
+            { text: "concentrate", meaning: "專心" },
+            { text: "pay attention", meaning: "留心聽／看" },
+            { text: "hard-working", meaning: "勤奮的" }
+          ],
+          example: "The hard-working pupils concentrate and pay attention during the lesson."
+        },
+        {
+          items: [
+            { text: "cooperate", meaning: "合作" },
+            { text: "in a team", meaning: "在團隊中" },
+            { text: "support each other", meaning: "互相支持" }
+          ],
+          example: "We cooperate in a team and support each other on the project."
+        },
+        {
+          items: [
+            { text: "organised", meaning: "有條理的" },
+            { text: "on time", meaning: "準時" },
+            { text: "hand in", meaning: "上交（功課）" }
+          ],
+          example: "She is organised, arrives on time, and hands in her homework early."
+        },
+        {
+          items: [
+            { text: "confident", meaning: "有信心的" },
+            { text: "try my best", meaning: "盡力而為" },
+            { text: "never give up", meaning: "永不放棄" }
+          ],
+          example: "I feel confident when I try my best and never give up."
+        },
+        {
+          items: [
+            { text: "nervous", meaning: "緊張的" },
+            { text: "take a deep breath", meaning: "深呼吸" },
+            { text: "calm down", meaning: "冷靜下來" }
+          ],
+          example: "Before the test, I felt nervous, but I took a deep breath and calmed down."
+        },
+        {
+          items: [
+            { text: "delighted", meaning: "非常開心的" },
+            { text: "proud of myself", meaning: "為自己自豪" },
+            { text: "well done", meaning: "做得好" }
+          ],
+          example: "I was delighted and proud of myself when the teacher said, \"Well done!\""
+        },
+        {
+          items: [
+            { text: "disappointed", meaning: "失望的" },
+            { text: "however", meaning: "然而" },
+            { text: "keep going", meaning: "繼續努力" }
+          ],
+          example: "I was disappointed with my score; however, I will keep going."
+        },
+        {
+          items: [
+            { text: "respect", meaning: "尊重" },
+            { text: "politely", meaning: "有禮貌地" },
+            { text: "raise my hand", meaning: "舉手" }
+          ],
+          example: "We respect our teachers and speak politely when we raise our hands."
+        },
+        {
+          items: [
+            { text: "curious", meaning: "好奇的" },
+            { text: "find out", meaning: "找出／查明" },
+            { text: "ask questions", meaning: "發問" }
+          ],
+          example: "I am curious, so I like to ask questions and find out more."
+        },
+        {
+          items: [
+            { text: "explain", meaning: "解釋" },
+            { text: "clearly", meaning: "清楚地" },
+            { text: "in detail", meaning: "詳細地" }
+          ],
+          example: "The monitor can explain the rules clearly and in detail."
+        },
+        {
+          items: [
+            { text: "helpful", meaning: "樂於助人的" },
+            { text: "take care of", meaning: "照顧" },
+            { text: "younger brother", meaning: "弟弟" }
+          ],
+          example: "At home, I am helpful and take care of my younger brother."
+        },
+        {
+          items: [
+            { text: "responsible", meaning: "有責任感的" },
+            { text: "chores", meaning: "家務" },
+            { text: "without being asked", meaning: "不用人提醒" }
+          ],
+          example: "I am responsible and do my chores without being asked."
+        },
+        {
+          items: [
+            { text: "grateful", meaning: "感激的" },
+            { text: "because of", meaning: "因為／由於" },
+            { text: "kindness", meaning: "善意" }
+          ],
+          example: "I feel grateful because of my parents' kindness."
+        },
+        {
+          items: [
+            { text: "quarrel", meaning: "爭吵" },
+            { text: "apologise", meaning: "道歉" },
+            { text: "make up", meaning: "和好" }
+          ],
+          example: "After a quarrel, we apologise and make up quickly."
+        },
+        {
+          items: [
+            { text: "memorable", meaning: "難忘的" },
+            { text: "family dinner", meaning: "家庭晚餐" },
+            { text: "chat together", meaning: "一起聊天" }
+          ],
+          example: "It was a memorable family dinner when we chatted together."
+        },
+        {
+          items: [
+            { text: "at the weekend", meaning: "在週末" },
+            { text: "explore", meaning: "探索" },
+            { text: "country park", meaning: "郊野公園" }
+          ],
+          example: "At the weekend, we explore the country park on foot."
+        },
+        {
+          items: [
+            { text: "breathtaking", meaning: "令人驚嘆的" },
+            { text: "scenery", meaning: "景色" },
+            { text: "take photos", meaning: "拍照" }
+          ],
+          example: "The scenery was breathtaking, so we took many photos."
+        },
+        {
+          items: [
+            { text: "exhausted", meaning: "筋疲力盡的" },
+            { text: "after a long hike", meaning: "走完長途後" },
+            { text: "refreshing", meaning: "提神的" }
+          ],
+          example: "After a long hike, I was exhausted but the drink was refreshing."
+        },
+        {
+          items: [
+            { text: "indoors", meaning: "在室內" },
+            { text: "board game", meaning: "桌上遊戲" },
+            { text: "laugh loudly", meaning: "大笑" }
+          ],
+          example: "It rained, so we stayed indoors and played a board game. We laughed loudly."
+        },
+        {
+          items: [
+            { text: "volunteer", meaning: "做義工" },
+            { text: "elderly", meaning: "長者" },
+            { text: "spread joy", meaning: "帶來歡樂" }
+          ],
+          example: "We volunteer to visit the elderly and spread joy."
+        },
+        {
+          items: [
+            { text: "generous", meaning: "慷慨的" },
+            { text: "donate", meaning: "捐贈" },
+            { text: "those in need", meaning: "有需要的人" }
+          ],
+          example: "Our school is generous and donates books to those in need."
+        },
+        {
+          items: [
+            { text: "environment", meaning: "環境" },
+            { text: "reduce waste", meaning: "減少浪費" },
+            { text: "recycle", meaning: "回收" }
+          ],
+          example: "We protect the environment when we reduce waste and recycle."
+        },
+        {
+          items: [
+            { text: "although", meaning: "雖然" },
+            { text: "challenging", meaning: "有挑戰性的" },
+            { text: "succeed", meaning: "成功" }
+          ],
+          example: "Although the task was challenging, we succeeded in the end."
+        },
+        {
+          items: [
+            { text: "suddenly", meaning: "突然" },
+            { text: "realise", meaning: "意識到" },
+            { text: "by accident", meaning: "意外地" }
+          ],
+          example: "Suddenly, I realised I had left my book at home by accident."
+        },
+        {
+          items: [
+            { text: "meanwhile", meaning: "與此同時" },
+            { text: "prepare", meaning: "準備" },
+            { text: "presentation", meaning: "匯報／展示" }
+          ],
+          example: "Meanwhile, my classmate prepared a wonderful presentation."
+        },
+        {
+          items: [
+            { text: "thrilled", meaning: "非常興奮的" },
+            { text: "invitation", meaning: "邀請" },
+            { text: "accept", meaning: "接受" }
+          ],
+          example: "I was thrilled to get an invitation and gladly accepted it."
+        },
+        {
+          items: [
+            { text: "embarrassed", meaning: "尷尬的" },
+            { text: "cheer me up", meaning: "令我振奮" },
+            { text: "encouraging words", meaning: "鼓勵的話" }
+          ],
+          example: "I felt embarrassed, but my friend's encouraging words cheered me up."
+        },
+        {
+          items: [
+            { text: "peaceful", meaning: "寧靜的" },
+            { text: "relax", meaning: "放鬆" },
+            { text: "after school", meaning: "放學後" }
+          ],
+          example: "After school, the library is peaceful and I can relax with a book."
+        },
+        {
+          items: [
+            { text: "delicious", meaning: "美味的" },
+            { text: "homemade", meaning: "自家製的" },
+            { text: "special treat", meaning: "特別的美食" }
+          ],
+          example: "Grandma made a delicious, homemade soup as a special treat."
+        },
+        {
+          items: [
+            { text: "improve", meaning: "改善／進步" },
+            { text: "step by step", meaning: "一步步" },
+            { text: "practice regularly", meaning: "定時練習" }
+          ],
+          example: "I improve step by step when I practice regularly."
+        },
+        {
+          items: [
+            { text: "determined", meaning: "堅定的" },
+            { text: "achieve", meaning: "達成" },
+            { text: "my goal", meaning: "我的目標" }
+          ],
+          example: "I am determined to achieve my goal this term."
+        }
       ];
 
       const store = {
@@ -496,8 +716,43 @@
         return DAYS[contentIndexForDate(parseDateKey(key))];
       }
 
+      function itemsHtml(lesson) {
+        return (
+          '<div class="items-grid">' +
+          lesson.items
+            .map(function (item, i) {
+              return (
+                '<div class="item-row">' +
+                '<p class="item-text">' +
+                (i + 1) +
+                ". " +
+                escapeHtml(item.text) +
+                "</p>" +
+                '<p class="item-meaning">中文：' +
+                escapeHtml(item.meaning) +
+                "</p></div>"
+              );
+            })
+            .join("") +
+          "</div>"
+        );
+      }
+
       function taskText(lesson) {
-        return "用今日詞語 <strong>" + lesson.word + "</strong> 或片語 <strong>" + lesson.expression + "</strong> 寫一句英文。";
+        const labels = lesson.items
+          .map(function (item) {
+            return "<strong>" + escapeHtml(item.text) + "</strong>";
+          })
+          .join("、");
+        return "用今日其中一個或以上的詞語寫一句英文（可選：" + labels + "）。";
+      }
+
+      function historyPreview(lesson) {
+        return lesson.items
+          .map(function (item) {
+            return item.text;
+          })
+          .join(" · ");
       }
 
       function computeStreak(completed) {
@@ -536,13 +791,10 @@
         const html =
           '<article class="card">' +
           '<span class="date-badge">' + formatDisplay(dateKey) + "</span>" +
-          '<p class="section-label">今日詞語 Word</p>' +
-          '<h2 class="word">' + lesson.word + "</h2>" +
-          '<p class="meaning">中文：' + lesson.meaning + "</p>" +
-          '<p class="section-label">寫作片語 Expression</p>' +
-          '<p class="expression">' + lesson.expression + "</p>" +
+          '<p class="section-label">今日三項 · 3 words / phrases</p>' +
+          itemsHtml(lesson) +
           '<p class="section-label">例句 Example</p>' +
-          '<p class="example">' + lesson.example + "</p>" +
+          '<p class="example">' + escapeHtml(lesson.example) + "</p>" +
           '<div class="task-box"><p class="section-label" style="margin-bottom:0.4rem">小任務 Task</p><p>' +
           taskText(lesson) +
           "</p></div>" +
@@ -592,7 +844,6 @@
         const key = localDateKey(new Date());
         const data = store.load();
         const done = !!data.completed[key];
-        const lesson = getLesson(key);
 
         document.getElementById("todayCard").innerHTML =
           '<div id="innerToday"></div>' +
@@ -648,9 +899,7 @@
               (item.done ? "已完成" : "未完成") +
               '"></span></div>' +
               '<div class="w">' +
-              item.lesson.word +
-              " · " +
-              item.lesson.expression +
+              historyPreview(item.lesson) +
               "</div></button>"
             );
           })
