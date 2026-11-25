@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="全年英文計劃" />
+  <meta name="theme-color" content="#1d4ed8" />
+  <title>小三全年英文計劃 · P3 Year Plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --card: #ffffff;
+      --accent: #1d4ed8;
+      --accent-d: #1e40af;
+      --accent-soft: #dbeafe;
+      --amber: #d97706;
+      --amber-soft: #fef3c7;
+      --green: #16a34a;
+      --green-soft: #dcfce7;
+      --violet-soft: #ede9fe;
+      --radius: 1rem;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "PingFang HK", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, #dbeafe 0%, transparent 45%),
+        radial-gradient(circle at bottom left, #fef3c7 0%, transparent 40%),
+        var(--bg);
+      padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wrap { max-width: 26rem; margin: 0 auto; }
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    h1 { margin: 0; font-size: 1.32rem; line-height: 1.25; }
+    .sub { margin: 0.2rem 0 0; font-size: 0.82rem; color: var(--muted); }
+    .streak-pill {
+      flex-shrink: 0;
+      text-align: center;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.85rem;
+      padding: 0.45rem 0.65rem;
+      min-width: 4.5rem;
+    }
+    .streak-pill .num {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--amber);
+    }
+    .streak-pill .lbl { font-size: 0.68rem; color: var(--muted); font-weight: 600; }
+    .tabs {
+      display: flex;
+      gap: 0.35rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.25rem;
+      margin-bottom: 1rem;
+    }
+    .tabs button {
+      flex: 1;
+      border: 0;
+      background: transparent;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.5rem 0.35rem;
+      border-radius: 999px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .tabs button.active { background: var(--accent-soft); color: var(--accent); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.15rem;
+      margin-bottom: 0.85rem;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+    }
+    .date-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 0.4rem;
+      background: var(--accent-soft);
+      color: var(--accent);
+      margin-bottom: 0.55rem;
+    }
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 0.35rem;
+    }
+    .item-row {
+      padding: 0.65rem 0.75rem;
+      background: var(--bg);
+      border-radius: 0.65rem;
+      border: 1px solid var(--line);
+      margin-bottom: 0.75rem;
+    }
+    .item-text {
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--accent);
+      margin: 0 0 0.25rem;
+      line-height: 1.35;
+    }
+    .item-meaning { margin: 0; font-size: 0.92rem; color: var(--muted); }
+    .example {
+      margin: 0;
+      padding: 0.75rem 0.9rem;
+      background: var(--bg);
+      border-radius: 0.65rem;
+      border-left: 3px solid var(--accent);
+      font-size: 0.95rem;
+      line-height: 1.55;
+      font-style: italic;
+    }
+    .guide-box {
+      font-size: 0.88rem;
+      line-height: 1.5;
+      padding: 0.75rem 0.85rem;
+      background: var(--violet-soft);
+      border-radius: 0.65rem;
+      margin-bottom: 0.75rem;
+    }
+    .task-box {
+      background: var(--amber-soft);
+      border: 1px solid #fcd34d;
+      border-radius: 0.75rem;
+      padding: 0.85rem 1rem;
+      margin-top: 0.85rem;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+    .calm-box {
+      background: #f1f5f9;
+      border: 1px dashed #cbd5e1;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+    .word-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin: 0.5rem 0 0;
+    }
+    .chip {
+      font-size: 0.78rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    textarea {
+      width: 100%;
+      font: inherit;
+      font-size: 1rem;
+      line-height: 1.55;
+      padding: 0.75rem 0.85rem;
+      border: 2px solid var(--line);
+      border-radius: 0.75rem;
+      background: #fff;
+      resize: vertical;
+      min-height: 5.5rem;
+      margin-top: 0.55rem;
+    }
+    textarea:focus { outline: none; border-color: var(--accent); }
+    .btn-row { display: flex; flex-direction: column; gap: 0.55rem; margin-top: 1rem; }
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 0.85rem;
+      padding: 0.85rem 1rem;
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 0 var(--accent-d);
+    }
+    .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-d); }
+    .btn.done { background: var(--green); box-shadow: 0 4px 0 #15803d; }
+    .done-banner {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--green-soft);
+      border: 1px solid #86efac;
+      border-radius: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      margin-bottom: 0.85rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #166534;
+    }
+    .done-banner.show { display: flex; }
+    .history-list { display: flex; flex-direction: column; gap: 0.55rem; }
+    .history-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.85rem;
+      padding: 0.75rem 0.9rem;
+      font: inherit;
+      cursor: pointer;
+      color: inherit;
+    }
+    .dot-done, .dot-pending {
+      width: 0.55rem; height: 0.55rem; border-radius: 50%; flex-shrink: 0;
+    }
+    .dot-done { background: var(--green); }
+    .dot-pending { background: var(--line); }
+    .history-item .top { display: flex; justify-content: space-between; align-items: center; }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.88rem;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(1.25rem + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: #fff;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .toast.show { opacity: 1; }
+    .md strong { font-weight: 700; color: var(--ink); }
+    .md em { font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>小三全年英文計劃</h1>
+        <p class="sub">跟足行事曆：週一學新詞 → 週六溫習 → 週日寫作</p>
+      </div>
+      <div class="streak-pill">
+        <span class="num" id="streakNum">0</span>
+        <span class="lbl">🔥 連續天數</span>
+      </div>
+    </header>
+    <nav class="tabs">
+      <button type="button" class="active" data-tab="today">今日</button>
+      <button type="button" data-tab="history">往日</button>
+    </nav>
+    <section id="panelToday" class="panel active">
+      <div id="doneBanner" class="done-banner"><span>✅</span><span>今日已完成！</span></div>
+      <div id="todayCard"></div>
+    </section>
+    <section id="panelHistory" class="panel" hidden>
+      <p class="sub" style="margin:0 0 0.75rem">本學年（9月1日起）已過的日子。</p>
+      <div id="historyList" class="history-list"></div>
+    </section>
+    <section id="panelDay" class="panel" hidden>
+      <a href="#" class="back-link" id="backFromDay">← 返回列表</a>
+      <div id="dayCard"></div>
+    </section>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="plan-data.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const STORAGE_KEY = "p3-plan-checkin-v1";
+      const PLAN = (typeof globalThis !== "undefined" ? globalThis : window).P3_YEAR_PLAN;
+      const DOW_ZH = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+
+      const store = {
+        load() {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : { completed: {}, sentences: {} };
+          } catch (e) {
+            return { completed: {}, sentences: {} };
+          }
+        },
+        save(data) {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          } catch (e) {
+            toast("未能儲存");
+          }
+        },
+      };
+
+      function pad(n) {
+        return String(n).padStart(2, "0");
+      }
+      function localDateKey(d) {
+        return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+      }
+      function parseDateKey(key) {
+        const p = key.split("-").map(Number);
+        return new Date(p[0], p[1] - 1, p[2]);
+      }
+      function midnight(d) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      }
+      function addDays(d, n) {
+        const x = new Date(d);
+        x.setDate(x.getDate() + n);
+        return x;
+      }
+      function schoolYearStartYear(d) {
+        return d.getMonth() >= 8 ? d.getFullYear() : d.getFullYear() - 1;
+      }
+      function schoolYearStart(startYear) {
+        return new Date(startYear, 8, 1);
+      }
+      function schoolYearEnd(startYear) {
+        return new Date(startYear + 1, 7, 31);
+      }
+      function schoolYearLabel(startYear) {
+        const e = (startYear + 1) % 100;
+        return startYear + "–" + (e < 10 ? "0" : "") + e + " 學年";
+      }
+      function firstMondayOnOrAfter(d) {
+        const m = midnight(d);
+        const w = m.getDay();
+        if (w === 1) return m;
+        if (w === 0) return addDays(m, 1);
+        return addDays(m, 8 - w);
+      }
+      function mondayOfWeek(d) {
+        const m = midnight(d);
+        const w = m.getDay();
+        return addDays(m, w === 0 ? -6 : 1 - w);
+      }
+      function lastSundayOnOrBeforeAug31(startYear) {
+        const aug31 = schoolYearEnd(startYear);
+        const d = midnight(aug31);
+        return addDays(d, d.getDay() === 0 ? 0 : -d.getDay());
+      }
+      /** Week 1 = first Monday on/after 1 Sep; Week 52 Sun capped so it never falls after 31 Aug. */
+      function planBounds(startYear) {
+        const week1Mon = firstMondayOnOrAfter(schoolYearStart(startYear));
+        const natural52Sun = addDays(week1Mon, 51 * 7 + 6);
+        const lastSun = lastSundayOnOrBeforeAug31(startYear);
+        const week52Sun = natural52Sun.getTime() <= lastSun.getTime() ? natural52Sun : lastSun;
+        return { week1Mon, week52Sun, natural52Sun };
+      }
+
+      function resolvePlanDay(d) {
+        const startYear = schoolYearStartYear(d);
+        const sep1 = schoolYearStart(startYear);
+        const aug31 = schoolYearEnd(startYear);
+        const md = midnight(d);
+        if (md < sep1 || md > aug31) return { type: "out" };
+        const bounds = planBounds(startYear);
+        const week1Mon = bounds.week1Mon;
+        const week52Sun = bounds.week52Sun;
+        if (week1Mon > sep1 && md < week1Mon) {
+          return {
+            type: "pre",
+            startYear,
+            sep1,
+            week1Mon,
+            messageZh:
+              "學年已在 9 月 1 日開始。第一個「週一學新詞」是 " +
+              formatShort(week1Mon) +
+              "。今天可以休息、翻閱舊筆記，或預習 Week 1。",
+          };
+        }
+        if (md > week52Sun) {
+          return {
+            type: "post",
+            startYear,
+            messageZh:
+              "Week 52 已在 " +
+              formatShort(week52Sun) +
+              " 結束。今天在學年結束前排，可以自由溫習或休息。",
+          };
+        }
+        const currMon = mondayOfWeek(md);
+        let weekNum = Math.floor((currMon - week1Mon) / 86400000 / 7) + 1;
+        if (weekNum < 1) weekNum = 1;
+        if (weekNum > 52) {
+          return {
+            type: "post",
+            startYear,
+            messageZh:
+              "52 週計劃已完成。今天可以自由溫習最喜愛的詞語，或休息。",
+          };
+        }
+        const week = PLAN.weeks[weekNum - 1];
+        const dow = md.getDay();
+        if (dow >= 1 && dow <= 5) {
+          return {
+            type: "lesson",
+            kind: "learn",
+            startYear,
+            weekNum,
+            week,
+            learn: week.learn[dow - 1],
+            dow,
+          };
+        }
+        if (dow === 6) {
+          return {
+            type: "lesson",
+            kind: "review",
+            startYear,
+            weekNum,
+            week,
+            review: week.review,
+            dow,
+          };
+        }
+        return {
+          type: "lesson",
+          kind: "writing",
+          startYear,
+          weekNum,
+          week,
+          writing: week.writing,
+          dow,
+        };
+      }
+
+      function formatShort(d) {
+        return d.getMonth() + 1 + "月" + d.getDate() + "日（" + DOW_ZH[d.getDay()] + "）";
+      }
+
+      function formatDisplay(key) {
+        const d = parseDateKey(key);
+        return d.getFullYear() + "年" + formatShort(d);
+      }
+
+      function schoolMeta(resolved, key) {
+        if (!resolved || resolved.type === "out") return "";
+        const startYear = resolved.startYear;
+        if (resolved.type === "pre") return schoolYearLabel(startYear) + " · 學年前暖身";
+        if (resolved.type === "post") return schoolYearLabel(startYear) + " · 計劃後自習";
+        return (
+          schoolYearLabel(startYear) +
+          " · Week " +
+          resolved.weekNum +
+          " · " +
+          DOW_ZH[resolved.dow]
+        );
+      }
+
+      function escapeHtml(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function renderMd(text) {
+        let s = escapeHtml(text || "");
+        s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+        s = s.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+        return '<span class="md">' + s + "</span>";
+      }
+
+      function chipsHtml(words) {
+        if (!words || !words.length) return "";
+        return (
+          '<div class="word-chips">' +
+          words.map(function (w) {
+            return '<span class="chip">' + escapeHtml(w) + "</span>";
+          }).join("") +
+          "</div>"
+        );
+      }
+
+      function roleLabel(resolved) {
+        if (resolved.type !== "lesson") return "";
+        if (resolved.kind === "learn") return "週一～五學習 · Learn";
+        if (resolved.kind === "review") return "週六複習 · Review";
+        return "週日小寫作 · Writing";
+      }
+
+      function lessonHtml(resolved) {
+        if (resolved.type === "pre" || resolved.type === "post") {
+          return (
+            '<article class="card"><div class="calm-box">' +
+            escapeHtml(resolved.messageZh) +
+            "</div></article>"
+          );
+        }
+        if (resolved.type === "out") {
+          return (
+            '<article class="card"><div class="calm-box">這一天不在本學年（9 月 1 日至 8 月 31 日）內。</div></article>'
+          );
+        }
+
+        let body = "";
+        if (resolved.kind === "learn") {
+          const L = resolved.learn;
+          const hint = L.upgradeFrom
+            ? "升級替換：" + escapeHtml(L.upgradeFrom)
+            : L.usage
+              ? "用法：" + escapeHtml(L.usage)
+              : "";
+          body +=
+            '<p class="section-label">' +
+            roleLabel(resolved) +
+            " · " +
+            escapeHtml(resolved.week.weekTitle) +
+            "</p>" +
+            '<div class="guide-box"><p style="margin:0 0 0.35rem">' +
+            escapeHtml(PLAN.learnGuide.zh) +
+            '</p><p style="margin:0;font-size:0.82rem;color:var(--muted)">' +
+            escapeHtml(PLAN.learnGuide.en) +
+            "</p></div>" +
+            '<div class="item-row"><p class="item-text">' +
+            escapeHtml(L.title) +
+            (L.pos ? " (" + escapeHtml(L.pos) + ")" : "") +
+            "</p><p class=\"item-meaning\">中文：" +
+            escapeHtml(L.meaning) +
+            "</p>" +
+            (hint ? '<p class="item-meaning" style="margin-top:0.35rem">' + hint + "</p>" : "") +
+            "</div>" +
+            '<p class="section-label">例句 Example</p><p class="example">' +
+            escapeHtml(L.example) +
+            "</p>";
+        } else if (resolved.kind === "review") {
+          body +=
+            '<p class="section-label">' +
+            roleLabel(resolved) +
+            " · Week " +
+            resolved.weekNum +
+            "</p>" +
+            '<div class="guide-box"><p style="margin:0 0 0.35rem">' +
+            escapeHtml(PLAN.learnGuideSat.zh) +
+            '</p><p style="margin:0;font-size:0.82rem;color:var(--muted)">' +
+            escapeHtml(PLAN.learnGuideSat.en) +
+            "</p></div>" +
+            '<p class="section-label">本週詞語</p>' +
+            chipsHtml(resolved.review.weekWords) +
+            '<div class="task-box">' +
+            renderMd(resolved.review.task) +
+            "</div>";
+        } else {
+          body +=
+            '<p class="section-label">' +
+            roleLabel(resolved) +
+            " · Week " +
+            resolved.weekNum +
+            "</p>" +
+            '<div class="guide-box"><p style="margin:0 0 0.35rem">' +
+            escapeHtml(PLAN.learnGuideSun.zh) +
+            '</p><p style="margin:0;font-size:0.82rem;color:var(--muted)">' +
+            escapeHtml(PLAN.learnGuideSun.en) +
+            "</p></div>" +
+            '<p class="section-label">本週可用詞語</p>' +
+            chipsHtml(resolved.writing.weekWords) +
+            '<div class="task-box">' +
+            renderMd(resolved.writing.task) +
+            "</div>";
+        }
+        return '<article class="card">' + body + "</article>";
+      }
+
+      function historyPreview(resolved) {
+        if (resolved.type === "pre") return "學年前暖身";
+        if (resolved.type === "post") return "計劃後自習";
+        if (resolved.type === "out") return "—";
+        if (resolved.kind === "learn") return resolved.learn.title;
+        if (resolved.kind === "review") return "Week " + resolved.weekNum + " 複習";
+        return "Week " + resolved.weekNum + " 寫作";
+      }
+
+      function computeStreak(completed) {
+        let count = 0;
+        let d = midnight(new Date());
+        const startYear = schoolYearStartYear(d);
+        const yearStart = schoolYearStart(startYear).getTime();
+        if (!completed[localDateKey(d)]) d = addDays(d, -1);
+        while (d.getTime() >= yearStart && completed[localDateKey(d)]) {
+          count += 1;
+          d = addDays(d, -1);
+        }
+        return count;
+      }
+
+      function toast(msg) {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.add("show");
+        clearTimeout(toast._t);
+        toast._t = setTimeout(function () {
+          el.classList.remove("show");
+        }, 2200);
+      }
+
+      function renderCard(targetId, dateKey, isToday) {
+        const resolved = resolvePlanDay(parseDateKey(dateKey));
+        const data = store.load();
+        const done = !!data.completed[dateKey];
+        const sentence = data.sentences[dateKey] || "";
+        const canWrite = resolved.type === "lesson";
+
+        document.getElementById(targetId).innerHTML =
+          '<span class="date-badge">' +
+          formatDisplay(dateKey) +
+          "</span>" +
+          '<p class="sub" style="margin:0 0 0.75rem;font-size:0.82rem">' +
+          escapeHtml(schoolMeta(resolved, dateKey)) +
+          "</p>" +
+          lessonHtml(resolved) +
+          (isToday && canWrite
+            ? '<label class="section-label" for="sentenceBox">' +
+              (resolved.kind === "writing" ? "我的段落" : "我的句子") +
+              '</label><textarea id="sentenceBox" placeholder="' +
+              (resolved.kind === "writing"
+                ? "Write your paragraph here…"
+                : "Write your sentence here…") +
+              '">' +
+              escapeHtml(sentence) +
+              "</textarea>"
+            : !isToday && sentence
+              ? '<p class="section-label">已儲存的文字</p><p class="example" style="font-style:normal">' +
+                escapeHtml(sentence) +
+                "</p>"
+              : "");
+
+        if (isToday) {
+          const banner = document.getElementById("doneBanner");
+          banner.classList.toggle("show", done);
+          const btn = document.getElementById("doneBtn");
+          if (btn) {
+            btn.textContent = done ? "✓ 已完成（再按可取消）" : "完成今日打卡";
+            btn.classList.toggle("done", done);
+          }
+          const box = document.getElementById("sentenceBox");
+          if (box) {
+            box.addEventListener("input", function () {
+              const st = store.load();
+              st.sentences[dateKey] = box.value;
+              store.save(st);
+            });
+          }
+        }
+      }
+
+      function renderToday() {
+        const key = localDateKey(new Date());
+        const done = !!store.load().completed[key];
+        document.getElementById("todayCard").innerHTML =
+          '<div id="innerToday"></div><div class="btn-row">' +
+          '<button type="button" class="btn' +
+          (done ? " done" : "") +
+          '" id="doneBtn">' +
+          (done ? "✓ 已完成" : "完成今日打卡") +
+          "</button></div>";
+        renderCard("innerToday", key, true);
+        document.getElementById("doneBtn").addEventListener("click", function () {
+          const st = store.load();
+          const k = localDateKey(new Date());
+          st.completed[k] = !st.completed[k];
+          if (!st.completed[k]) delete st.completed[k];
+          const box = document.getElementById("sentenceBox");
+          if (box && box.value.trim()) st.sentences[k] = box.value.trim();
+          store.save(st);
+          document.getElementById("streakNum").textContent = String(computeStreak(st.completed));
+          renderToday();
+          if (st.completed[k]) toast("做得好！");
+        });
+      }
+
+      function renderHistory() {
+        const list = document.getElementById("historyList");
+        const data = store.load();
+        const startYear = schoolYearStartYear(new Date());
+        const items = [];
+        let d = midnight(new Date());
+        const start = schoolYearStart(startYear);
+        while (d >= start) {
+          const key = localDateKey(d);
+          const resolved = resolvePlanDay(d);
+          items.push({ key, resolved, done: !!data.completed[key] });
+          d = addDays(d, -1);
+        }
+        list.innerHTML = items
+          .map(function (it) {
+            return (
+              '<button type="button" class="history-item" data-key="' +
+              it.key +
+              '"><div class="top"><span>' +
+              formatDisplay(it.key) +
+              '</span><span class="' +
+              (it.done ? "dot-done" : "dot-pending") +
+              '"></span></div><div class="sub" style="margin:0.25rem 0 0;font-size:0.85rem">' +
+              escapeHtml(historyPreview(it.resolved)) +
+              "</div></button>"
+            );
+          })
+          .join("");
+        list.querySelectorAll(".history-item").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            showPanel("day");
+            document.getElementById("dayCard").innerHTML = "";
+            renderCard("dayCard", btn.getAttribute("data-key"), false);
+          });
+        });
+      }
+
+      function showPanel(name) {
+        const map = { today: "panelToday", history: "panelHistory", day: "panelDay" };
+        Object.keys(map).forEach(function (k) {
+          const el = document.getElementById(map[k]);
+          const on = k === name;
+          el.classList.toggle("active", on);
+          el.hidden = !on;
+        });
+        document.querySelectorAll(".tabs button").forEach(function (b) {
+          b.classList.toggle(
+            "active",
+            b.getAttribute("data-tab") === (name === "day" ? "history" : name)
+          );
+        });
+      }
+
+      document.querySelectorAll(".tabs button").forEach(function (b) {
+        b.addEventListener("click", function () {
+          showPanel(b.getAttribute("data-tab"));
+          if (b.getAttribute("data-tab") === "history") renderHistory();
+        });
+      });
+      document.getElementById("backFromDay").addEventListener("click", function (e) {
+        e.preventDefault();
+        showPanel("history");
+        renderHistory();
+      });
+
+      document.getElementById("streakNum").textContent = String(computeStreak(store.load().completed));
+      renderToday();
+    })();
+  </script>
+</body>
+</html>
